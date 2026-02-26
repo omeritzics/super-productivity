@@ -37,7 +37,10 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "בוצע",
-        "IN_PROGRESS": "בתהליך"
+        "IN_PROGRESS": "בתהליך",
+        "URGENT": "דחוף",
+        "URGENT_IMPORTANT": "דחוף וחשוב",
+        "URGENT_NOT_IMPORTANT": "דחוף ולא חשוב"
       },
       "FORM": {
         "BACKLOG_TASK_FILTER_ALL": "הכול",
@@ -54,7 +57,9 @@
       },
       "ISSUE_CONTENT": {
         "DESCRIPTION": "תיאור",
-        "LABELS": "תוויות"
+        "LABELS": "תוויות",
+        "STATUS": "מצב",
+        "SUMMARY": "סיכום"
       },
       "S": {
       }
@@ -97,45 +102,67 @@
       }
     },
     "FOCUS_MODE": {
+      "ADD_TIME_MINUTE": "הוספת דקה אחת",
       "B": {
+        "PAUSE": "השהיה",
+        "START": "התחלה"
       },
-      "COUNTDOWN": "ספירה לאחור"
+      "COUNTDOWN": "ספירה לאחור",
+      "GOGOGO": "קדימה, קדימה, קדימה!!!",
+      "LONG_BREAK": "הפסקה ארוכה",
+      "POMODORO_SETTINGS": "הגדרות פומודורו",
+      "SHORT_BREAK": "הפסקה קצרה"
     },
     "GITEA": {
       "FORM": {
-        "SCOPE_ALL": "הכול"
+        "SCOPE_ALL": "הכול",
+        "TOKEN": "אסימון גישה"
       },
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
         "DESCRIPTION": "תיאור",
-        "LABELS": "תוויות"
+        "LABELS": "תוויות",
+        "PROJECT": "מיזם",
+        "STATUS": "מצב",
+        "SUMMARY": "סיכום"
       }
     },
     "GITHUB": {
       "FORM": {
+        "TOKEN": "אסימון גישה"
       },
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
         "DESCRIPTION": "תיאור",
-        "LABELS": "תוויות"
+        "LABELS": "תוויות",
+        "STATUS": "מצב",
+        "SUMMARY": "סיכום"
       },
       "S": {
       }
     },
     "GITLAB": {
       "DIALOG_SUBMIT_WORKLOG": {
+        "T_TITLE": "כותרת",
+        "T_TO_BE_SUBMITTED": "לשליחה"
       },
       "FORM": {
         "SCOPE_ALL": "הכול",
-        "SOURCE_GLOBAL": "הכול"
+        "SOURCE_GLOBAL": "הכול",
+        "SOURCE_GROUP": "קבוצה",
+        "SOURCE_PROJECT": "מיזם",
+        "TOKEN": "אסימון גישה"
       },
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
         "DESCRIPTION": "תיאור",
-        "LABELS": "תוויות"
+        "LABELS": "תוויות",
+        "PROJECT": "מיזם",
+        "STATUS": "מצב",
+        "SUMMARY": "סיכום"
       },
       "S": {
       }
@@ -143,9 +170,19 @@
     "ISSUE": {
       "DEFAULT": {
       },
+      "HOW_TO_GET_A_TOKEN": "איך לקבל אסימון?",
       "ISSUE_CONTENT": {
+        "CATEGORY": "קטגוריה",
         "DESCRIPTION": "תיאור",
-        "LABELS": "תוויות"
+        "DUE_DATE": "תאריך יעד",
+        "LABELS": "תוויות",
+        "LOCATION": "מיקום",
+        "PRIORITY": "עדיפות",
+        "STATUS": "מצב",
+        "SUMMARY": "סיכום",
+        "TIME_SPENT": "זמן שהושקע",
+        "TYPE": "סוג",
+        "VERSION": "גרסה"
       },
       "S": {
       }
@@ -183,18 +220,27 @@
       "S": {
       },
       "STEPPER": {
+        "WELCOME_USER": "ברוך בואך, {{user}}!"
       }
     },
     "CLIPBOARD_IMAGE": {
+      "PASTE_SUCCESS": "התמונה הודבקה בהצלחה"
     },
     "MARKDOWN_PASTE": {
     },
     "METRIC": {
       "CMP": {
+        "TIME_FRAME_1_MONTH": "חודש",
+        "TIME_FRAME_2_WEEKS": "שבועיים",
+        "TIME_FRAME_LABEL": "מסגרת זמן",
+        "TIME_SPENT": "זמן שהושקע",
+        "YEAR": "שנה"
       },
       "EVAL_FORM": {
       },
       "FOCUS_SESSION_DIALOG": {
+        "ADD_BTN": "הוספה",
+        "NEW_SESSION_DURATION": "משך זמן"
       },
       "REFLECTION": {
       }
@@ -202,6 +248,17 @@
     "NOTE": {
       "D_FULLSCREEN": {
         "TOOLBAR": {
+          "HEADING_1": "כותרת 1",
+          "HEADING_2": "כותרת 2",
+          "HEADING_3": "כותרת 3",
+          "INSERT_IMAGE": "הוספת תמונה",
+          "INSERT_LINK": "הוספת קישור",
+          "INSERT_TABLE": "הוספת טבלה",
+          "ITALIC": "נטוי",
+          "NUMBERED_LIST": "רשימה ממוספרת",
+          "QUOTE": "ציטוט",
+          "STRIKETHROUGH": "קו חוצה",
+          "TASK_LIST": "רשימת משימות"
         }
       },
       "NOTES_CMP": {
@@ -215,16 +272,24 @@
       "CFG_CMP": {
       },
       "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "פעילות"
       },
       "DIALOG_TRANSITION": {
+        "CURRENT_STATUS": "מצב נוכחי:",
+        "PERCENTAGE_DONE": "התקדמות:"
       },
       "FORM": {
-        "SCOPE_ALL": "הכול"
+        "PROJECT_ID": "מזהה מיזם",
+        "SCOPE_ALL": "הכול",
+        "TOKEN": "אסימון גישה"
       },
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
-        "DESCRIPTION": "תיאור"
+        "DESCRIPTION": "תיאור",
+        "STATUS": "מצב",
+        "SUMMARY": "סיכום",
+        "TYPE": "סוג"
       },
       "ISSUE_STRINGS": {
       },
@@ -242,23 +307,34 @@
       }
     },
     "POMODORO": {
+      "BREAK_IS_DONE": "ההפסקה הסתיימה!"
     },
     "PROJECT": {
       "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "CANCEL": "ביטול"
       },
       "D_CREATE": {
+        "CREATE": "יצירת מיזם",
+        "EDIT": "עריכת מיזם"
       },
       "D_DELETE": {
       },
       "FORM_BASIC": {
+        "L_TITLE": "שם מיזם",
+        "TITLE": "הגדרות בסיסיות"
       },
       "FORM_THEME": {
+        "L_COLOR_ACCENT": "צבע נושא",
+        "L_COLOR_PRIMARY": "צבע ראשי",
+        "L_COLOR_WARN": "צבע אזהרה/שגיאה",
+        "TITLE": "ערכת נושא"
       },
       "S": {
       }
     },
     "PROJECT_FOLDER": {
       "DIALOG": {
+        "CREATE_TITLE": "יצירת תיקייה"
       },
       "SELECT": {
       }
