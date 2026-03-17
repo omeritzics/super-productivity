@@ -13,12 +13,30 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+      - name: Generate release body
+        env:
+          GH_REPOSITORY: ${{ github.repository }}
+          GH_REF_NAME: ${{ github.ref_name }}
+        run: |
+          PREV_TAG=$(git tag --sort=-v:refname | grep '^v' | sed -n '2p')
+          {
+            cat build/release-notes.md
+            echo ""
+            if [ -n "$PREV_TAG" ]; then
+              echo "**Full Changelog**: https://github.com/${GH_REPOSITORY}/compare/${PREV_TAG}...${GH_REF_NAME}"
+            fi
+          } > /tmp/release-body.md
       - name: Create Draft Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           tag_name: ${{ github.ref_name }}
           draft: true
           prerelease: ${{ contains(github.ref, 'RC') || contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+          body_path: /tmp/release-body.md
 
   linux-bin-and-snap-release:
     runs-on: ubuntu-latest
@@ -28,7 +46,7 @@ jobs:
       UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: 22
       - name: Check out Git repository
@@ -83,7 +101,7 @@ jobs:
 
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: e2eResults
           path: .tmp/e2e-test-results/**/*.*
@@ -126,7 +144,7 @@ jobs:
       UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: 22
       - name: Echo is Release
@@ -225,7 +243,7 @@ jobs:
       UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
-      - uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: 22
       # required because setting via env.TZ does not work on windows
@@ -289,24 +307,12 @@ jobs:
           github_token: ${{ secrets.github_token }}
           release: false # Don't publish unsigned; we sign first, then publish
 
-      # Publish unsigned Windows binaries first so the release is never missing Windows assets
-      - name: Publish unsigned Windows binaries to GitHub Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          files: |
-            .tmp/app-builds/*.exe
-            .tmp/app-builds/*.blockmap
-            .tmp/app-builds/latest*.yml
-          draft: true
-          prerelease: ${{ contains(github.ref, 'RC') || contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
-
-      # --- Code signing (best-effort: signing failure won't block the release) ---
+      # --- Code signing (SignPath failure is tolerated; post-signing verification failures will block the release) ---
 
       - name: Upload unsigned executables for SignPath
         id: upload-unsigned
         continue-on-error: true
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:
           name: unsigned-windows-executables
           path: .tmp/app-builds/*.exe
@@ -322,7 +328,7 @@ jobs:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ secrets.SIGNPATH_ORGANIZATION_ID }}
           project-slug: super-productivity
-          signing-policy-slug: 'test-signing'
+          signing-policy-slug: 'release-signing'
           artifact-configuration-slug: 'github-zip-pe'
           github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
           output-artifact-directory: '.tmp/app-builds-signed/'
@@ -338,10 +344,27 @@ jobs:
             Write-Error "No signed executables found in SignPath output directory"
             exit 1
           }
+          # Build a map of original filenames for matching
+          # SignPath may replace spaces with dots in filenames, so we normalize
+          # spaces, dots, and hyphens to find the corresponding original file
+          $originals = Get-ChildItem -Path .tmp/app-builds -Filter *.exe
           $signed | ForEach-Object {
-            Move-Item -Force $_.FullName .tmp/app-builds/
+            $signedName = $_.Name
+            $normalizedSigned = $signedName -replace '[.\-\s]', ''
+            $match = $originals | Where-Object { ($_.Name -replace '[.\-\s]', '') -eq $normalizedSigned }
+            if ($match -is [array]) {
+              Write-Error "Ambiguous match for $signedName — matched multiple originals: $($match.Name -join ', ')"
+              exit 1
+            }
+            if ($match) {
+              Write-Host "Replacing $($match.Name) with signed version (was: $signedName)"
+              Move-Item -Force $_.FullName $match.FullName
+            } else {
+              Write-Error "No matching original found for signed file: $signedName"
+              exit 1
+            }
           }
-          Write-Host "Signed executables:"
+          Write-Host "Final executables:"
           Get-ChildItem -Path .tmp/app-builds -Filter *.exe | Format-Table -AutoSize
 
       - name: Verify code signatures
@@ -413,10 +436,10 @@ jobs:
             }
           "
 
-      # Overwrite unsigned release assets with signed versions
+      # Only publish signed Windows binaries
       - name: Publish signed Windows binaries to GitHub Release
         if: steps.signpath.outcome == 'success'
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b # v2.5.0
+        uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2.6.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |

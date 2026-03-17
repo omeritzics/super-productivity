@@ -41,10 +41,12 @@ import { IssueService } from '../../../issue/issue.service';
 import { TaskAttachmentService } from '../../task-attachment/task-attachment.service';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { ProjectService } from '../../../project/project.service';
+import { _MISSING_PROJECT_ } from '../../../project/project.const';
 import { WorkContextService } from '../../../work-context/work-context.service';
 import { GlobalConfigService } from '../../../config/global-config.service';
 import { KeyboardConfig } from '../../../config/keyboard-config.model';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { DialogDeadlineComponent } from '../../dialog-deadline/dialog-deadline.component';
 import { DialogTimeEstimateComponent } from '../../dialog-time-estimate/dialog-time-estimate.component';
 import { DialogEditTaskAttachmentComponent } from '../../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { throttle } from '../../../../util/decorators';
@@ -269,7 +271,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   goToFocusMode(): void {
     this._taskService.setCurrentId(this.task.id);
-    this._taskService.setSelectedId(this.task.id);
     this._store.dispatch(showFocusOverlay());
   }
 
@@ -285,6 +286,26 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       .subscribe((isPlanned) => {
         this.focusRelatedTaskOrNext();
       });
+  }
+
+  openDeadlineDialog(): void {
+    this._matDialog
+      .open(DialogDeadlineComponent, {
+        autoFocus: false,
+        data: { task: this.task },
+      })
+      .afterClosed()
+      .subscribe(() => {
+        this.focusRelatedTaskOrNext();
+      });
+  }
+
+  removeDeadline(): void {
+    this._store.dispatch(
+      TaskSharedActions.removeDeadline({
+        taskId: this.task.id,
+      }),
+    );
   }
 
   updateIssueData(): void {
@@ -531,7 +552,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
                     okTxt: T.F.TASK_REPEAT.D_CONFIRM_MOVE_TO_PROJECT.OK,
                     message: T.F.TASK_REPEAT.D_CONFIRM_MOVE_TO_PROJECT.MSG,
                     translateParams: {
-                      projectName: targetProject.title,
+                      projectName: targetProject?.title ?? _MISSING_PROJECT_,
                       tasksNr:
                         nonArchiveInstancesWithSubTasks.length + archiveInstances.length,
                     },

@@ -131,7 +131,8 @@ export class FocusModeEffects {
             }
             // User manually started tracking during break
             // Skip the break to sync with tracking (bug #5875 fix)
-            return of(actions.skipBreak({ pausedTaskId }));
+            // Bug #6726 fix: Don't pass pausedTaskId — the user already chose a new task
+            return of(actions.skipBreak({ pausedTaskId: undefined }));
           }
           // If no session active, start a new one (only from Main screen)
           if (timer.purpose === null && currentScreen === FocusScreen.Main) {
@@ -140,7 +141,6 @@ export class FocusModeEffects {
             return of(
               actions.startFocusSession({
                 duration,
-                isManualSessionCompletion: !!cfg?.isManualBreakStart,
               }),
             );
           }
@@ -273,28 +273,21 @@ export class FocusModeEffects {
 
   // Detect when work session timer completes and dispatch completeFocusSession
   // Only triggers when timer STOPS (isRunning becomes false) with elapsed >= duration
-  // When isManualSessionCompletion is true, the tick reducer keeps the timer running past
-  // duration, so this effect normally won't fire. The isManualSessionCompletion check here
-  // is a safety guard for the pause-during-overtime edge case (Bug #6206 + overtime fix).
   detectSessionCompletion$ = createEffect(() =>
     this.store.select(selectors.selectTimer).pipe(
       skipWhileApplyingRemoteOps(),
-      withLatestFrom(
-        this.store.select(selectors.selectMode),
-        this.store.select(selectors.selectIsManualSessionCompletion),
-      ),
+      withLatestFrom(this.store.select(selectors.selectMode)),
       // Only consider emissions where timer just stopped running
       distinctUntilChanged(
         ([prevTimer], [currTimer]) => prevTimer.isRunning === currTimer.isRunning,
       ),
       filter(
-        ([timer, mode, isManualSessionCompletion]) =>
+        ([timer, mode]) =>
           timer.purpose === 'work' &&
           !timer.isRunning &&
           timer.duration > 0 &&
           timer.elapsed >= timer.duration &&
-          mode !== FocusModeMode.Flowtime &&
-          !isManualSessionCompletion,
+          mode !== FocusModeMode.Flowtime,
       ),
 
       map(() => actions.completeFocusSession({ isManual: false })),
@@ -476,11 +469,14 @@ export class FocusModeEffects {
   // (reducer clears pausedTaskId before effect reads state)
 
   // Effect 1: Resume tracking after break
+  // Bug #6726 fix: Don't override if user is already tracking a different task
   resumeTrackingOnBreakComplete$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.completeBreak),
       filter((action) => !!action.pausedTaskId),
-      map((action) => setCurrentTask({ id: action.pausedTaskId! })),
+      withLatestFrom(this.taskService.currentTaskId$),
+      filter(([_, currentTaskId]) => !currentTaskId),
+      map(([action]) => setCurrentTask({ id: action.pausedTaskId! })),
     ),
   );
 
@@ -500,7 +496,6 @@ export class FocusModeEffects {
         const strategy = this.strategyFactory.getStrategy(mode);
         return actions.startFocusSession({
           duration: strategy.initialSessionDuration,
-          isManualSessionCompletion: !!config?.isManualBreakStart,
         });
       }),
     ),
@@ -524,13 +519,15 @@ export class FocusModeEffects {
       withLatestFrom(
         this.store.select(selectors.selectMode),
         this.store.select(selectFocusModeConfig),
+        this.taskService.currentTaskId$,
       ),
-      switchMap(([action, mode, config]) => {
+      switchMap(([action, mode, config, currentTaskId]) => {
         const strategy = this.strategyFactory.getStrategy(mode);
         const actionsToDispatch: any[] = [];
 
         // Resume task tracking if we paused it during break
-        if (action.pausedTaskId) {
+        // Bug #6726 fix: Don't override if user is already tracking a different task
+        if (action.pausedTaskId && !currentTaskId) {
           actionsToDispatch.push(setCurrentTask({ id: action.pausedTaskId }));
         }
 
@@ -540,7 +537,6 @@ export class FocusModeEffects {
           actionsToDispatch.push(
             actions.startFocusSession({
               duration,
-              isManualSessionCompletion: !!config?.isManualBreakStart,
             }),
           );
         }
@@ -937,7 +933,6 @@ export class FocusModeEffects {
           this.store.dispatch(
             actions.startFocusSession({
               duration: strategy.initialSessionDuration,
-              isManualSessionCompletion: !!config?.isManualBreakStart,
             }),
           );
         }
@@ -1002,7 +997,6 @@ export class FocusModeEffects {
           this.store.dispatch(
             actions.startFocusSession({
               duration: strategy.initialSessionDuration,
-              isManualSessionCompletion: !!focusModeConfig?.isManualBreakStart,
             }),
           );
         }

@@ -4,6 +4,14 @@
   overflow: auto;
   display: flex;
   height: 100%;
+
+  @include mq(xs, max) {
+    overflow-x: hidden;
+  }
+
+  &.isScrolled {
+    border-top: 1px solid var(--extra-border-color);
+  }
 }
 
 .days {

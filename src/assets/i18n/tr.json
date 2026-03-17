@@ -127,9 +127,13 @@
         "ADD_AS_TASK": "Görev Olarak Ekle",
         "SHOW_TASK": "Görevleri Göster",
         "TXT": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başlıyor!",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başlıyor!<br> (ve {{nrOfOfOtherBanners}} diğer etkinlik sona eriyor)",
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başlıyor!<br> (ve {{nrOfOfOtherBanners}} diğer etkinlik sona eriyor)"
+        },
         "TXT_PAST": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başladı!",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başladı!<br> (ve {{nrOfOfOtherBanners}} diğer etkinlik sona eriyor)"
+        "TXT_PAST_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başladı!<br> (ve {{nrOfOfOtherBanners}} diğer etkinlik sona eriyor)"
+        }
       },
       "EVENT_STRINGS": {
         "EVENTS_STR": "etkinlikler",
@@ -238,7 +242,7 @@
       "FORM": {
         "HOST": "Sağlayıcı (örneğin: https://try.gitea.io)",
         "REPO_FULL_NAME": "Kullanıcı adı veya Organizasyon adı/projesi",
-        "REPO_FULL_NAME_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
+        "REPO_FULL_NAME_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken URL'nin bir parçası olarak bulunabilir.",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Hepsi",
         "SCOPE_ASSIGNED": "Bana atanan",
@@ -678,7 +682,7 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "OpenProject projesi için etkinleştirilecek zaman izleme modülünü gerektirir",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Alt görevler tamamlandığında zaman izleme iletişim kutusunu göster",
         "PROJECT_ID": "Proje Kimliği",
-        "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
+        "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken URL'nin bir parçası olarak bulunabilir.",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Herşey",
         "SCOPE_ASSIGNED": "Bana Atanan",
@@ -803,7 +807,7 @@
         "API_KEY": "API erişim anahtarı",
         "HOST": "Sağlayıcı (e.g.: https://redmine.org)",
         "PROJECT_ID": "Proje Tanımlayıcı",
-        "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
+        "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken URL'nin bir parçası olarak bulunabilir.",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Hepsi",
         "SCOPE_ASSIGNED": "Bana atanan",
@@ -829,7 +833,9 @@
       "COUNTDOWN_BANNER": {
         "START_NOW": "Şimdi başla",
         "TXT": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!<br> (ve {{nrOfOtherBanners}} diğer görevlerin zamanı geldi)"
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!<br> (ve {{nrOfOtherBanners}} diğer görevlerin zamanı geldi)"
+        }
       },
       "S_ACTIVE_TASK_DUE": "Şu anda üzerinde çalıştığınız görevin süresi doldu!<br/> ({{title}})",
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
@@ -1521,9 +1527,9 @@
         "SORT_CREATION_DATE": "Oluşturma Tarihi",
         "SORT_DEFAULT": "Varsayılan",
         "SORT_NAME": "Ad",
-        "SORT_PERMANENT": "Sırala (kalıcı)",
+        "SAVE_SORT": "Varsayılan olarak kaydet",
         "SORT_SCHEDULED_DATE": "Planlanan Tarih",
-        "SORT_TEMPORARY": "Sırala (geçici)",
+        "SORT": "Sırala",
         "TIME_10MIN": "> 10 Dakika",
         "TIME_1HOUR": "> 1 Saat",
         "TIME_2HOUR": "> 2 Saat",
@@ -1960,7 +1966,7 @@
       "IS_LOCK_SCREEN": "Bir mola verilmesi gerektiğinde ekranı kilitle (yalnızca masaüstü)",
       "MESSAGE": "Bir mola mesajı al",
       "MIN_WORKING_TIME": "X bir tane olmadan çalıştıktan sonra bir mola verme bildirimini tetikleyin",
-      "MOTIVATIONAL_IMGS": "Motivasyonel resim (web url'si)",
+      "MOTIVATIONAL_IMGS": "Motivasyonel resim (web URL'si)",
       "NOTIFICATION_TITLE": "Ara ver!",
       "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı ertele",
       "TITLE": "Mola Hatırlatması"
@@ -2101,8 +2107,8 @@
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Bugünden itibaren görev ekleme",
     "ARCHIVED_TASKS": {
-      "PLURAL": "{{count}} tamamlanmış ana görevler arşivlendi",
-      "SINGULAR": "{{count}} tamamlanmış ana görev arşivlendi"
+      "ONE": "{{count}} tamamlanmış ana görev arşivlendi",
+      "OTHER": "{{count}} tamamlanmış ana görevler arşivlendi"
     },
     "BREAK_LABEL": "Molalar (saat / saat)",
     "CELEBRATE": "<i>Kutlamak</i> için bir dakikanızı ayırın!",

@@ -48,7 +48,7 @@
         "EDIT_ATTACHMENT": "Modifica allegato",
         "LABELS": {
           "IMG": "Immagine",
-          "LINK": "Url"
+          "LINK": "URL"
         },
         "SELECT_TYPE": "Seleziona un tipo",
         "TYPES": {
@@ -120,9 +120,13 @@
         "ADD_AS_TASK": "Aggiungi come attività",
         "SHOW_TASK": "Mostra attività",
         "TXT": "<strong>{{title}}</strong> parte alle <strong>{{start}}</strong>!",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> parte alle <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} altri eventi sono scaduti)",
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> parte alle <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} altri eventi sono scaduti)"
+        },
         "TXT_PAST": "<strong>{{title}}</strong> avviato alle <strong>{{start}}</strong>!",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> avviato alle <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} altri eventi sono scaduti)"
+        "TXT_PAST_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> avviato alle <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} altri eventi sono scaduti)"
+        }
       },
       "EVENT_STRINGS": {
         "EVENT_STR": "Evento",
@@ -226,7 +230,7 @@
       "FORM": {
         "HOST": "Host (es.: https://try.gitea.io)",
         "REPO_FULL_NAME": "Username o nome Organizzazione/Progetto",
-        "REPO_FULL_NAME_DESCRIPTION": "Può essere trovata come parte dell'url mentre visualizzi il progetto nel browser.",
+        "REPO_FULL_NAME_DESCRIPTION": "Può essere trovata come parte dell'URL mentre visualizzi il progetto nel browser.",
         "SCOPE": "Scopo",
         "SCOPE_ALL": "Tutti",
         "SCOPE_ASSIGNED": "Assegnate a me",
@@ -777,7 +781,7 @@
         "API_KEY": "Chiave di accesso API",
         "HOST": "Host (es.: https://redmine.org)",
         "PROJECT_ID": "Identificatore progetto",
-        "PROJECT_ID_DESCRIPTION": "Può essere trovato come parte dell'url, quando si visualizza il progetto nel Browser.",
+        "PROJECT_ID_DESCRIPTION": "Può essere trovato come parte dell'URL, quando si visualizza il progetto nel Browser.",
         "SCOPE": "Scopo",
         "SCOPE_ALL": "Tutti",
         "SCOPE_ASSIGNED": "Assegnate a me",
@@ -803,7 +807,9 @@
       "COUNTDOWN_BANNER": {
         "START_NOW": "Avvia ora",
         "TXT": "<strong>{{title}}</strong> parte alle <strong>{{start}}</strong>!",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> parte alle <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} altre attività sono scadute)"
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> parte alle <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} altre attività sono scadute)"
+        }
       },
       "S_ACTIVE_TASK_DUE": "L'attività su cui stai lavorando è scaduta!<br/> ({{title}})",
       "S_REMINDER_ERR": "Errore per interfaccia promemoria"
@@ -1316,9 +1322,9 @@
         "SORT_CREATION_DATE": "Data di creazione",
         "SORT_DEFAULT": "Predefinito",
         "SORT_NAME": "Nome",
-        "SORT_PERMANENT": "Ordina (permanente)",
+        "SAVE_SORT": "Salva come predefinito",
         "SORT_SCHEDULED_DATE": "Data programmata",
-        "SORT_TEMPORARY": "Ordina (temporaneo)",
+        "SORT": "Ordina",
         "TIME_1HOUR": "> 1 ora",
         "TIME_2HOUR": "> 2 ore",
         "TIME_10MIN": "> 10 minuti",
@@ -1503,7 +1509,7 @@
     },
     "CALENDARS": {
       "BROWSER_WARNING": "<b>Questo NON funzionerà con la versione Browser di Super Productivity.<br /> <a href=\"https://super-productivity.com/download/\">Scarica la versione desktop</a> per usare questa funzionalità!</b>",
-      "CAL_PATH": "Url della sorgente iCal",
+      "CAL_PATH": "URL della sorgente iCal",
       "CHECK_UPDATES": "Verifica aggiornamenti remoti ogni X tempo",
       "HELP": "Puoi integrare calendari per essere ricordati e aggiungerli come attività con Super Productivity. L'integrazione funziona usando il formato iCal. Affinché questo funzioni, il tuo calendario deve essere accessibile sia da Internet che da file system.",
       "SHOW_BANNER_THRESHOLD": "Mostra una notifica X tempo prima dell'evento (lascia bianco per disabilitare)"
@@ -1856,8 +1862,8 @@
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Aggiungi attività da oggi",
     "ARCHIVED_TASKS": {
-      "PLURAL": "{{count}} attività genitore completate sono state archiviate",
-      "SINGULAR": "{{count}} attività genitore completata è stata archiviata"
+      "ONE": "{{count}} attività genitore completata è stata archiviata",
+      "OTHER": "{{count}} attività genitore completate sono state archiviate"
     },
     "BREAK_LABEL": "Pause (numero / tempo)",
     "CELEBRATE": "Prenditi un attimo per <i>celebrare!</i>",

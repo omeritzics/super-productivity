@@ -3,7 +3,7 @@
 
 .clear-btn {
   opacity: 0.5;
-  border-radius: 4px !important;
+  border-radius: var(--card-border-radius) !important;
   margin-left: -8px;
   min-width: 32px;
   padding: 0;
@@ -121,9 +121,7 @@
     ::ng-deep > span,
     > span,
     .mdc-button__label > span {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      @include truncateText();
       min-width: 0; // Allow span to shrink
       display: inline-block; // Needed for ellipsis to work
       max-width: 100%; // Ensure it doesn't exceed parent
@@ -132,6 +130,10 @@
     mat-icon {
       flex-shrink: 0; // Prevent icon from shrinking
       margin-right: 4px;
+
+      &.repeat-icon {
+        transform: rotate(45deg);
+      }
     }
 
     &.has-value {
@@ -207,16 +209,9 @@
         }
 
         .tag-title {
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          @include truncateText();
           min-width: 0;
           font-size: 0.9em;
-        }
-
-        // Last visible tag gets truncated with ellipsis if needed
-        &:last-child .tag-title {
-          text-overflow: ellipsis;
         }
       }
     }

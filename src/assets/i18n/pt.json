@@ -48,7 +48,7 @@
         "EDIT_ATTACHMENT": "Editar anexo",
         "LABELS": {
           "IMG": "Imagem",
-          "LINK": "Url"
+          "LINK": "URL"
         },
         "SELECT_TYPE": "Selecione um tipo",
         "TYPES": {
@@ -120,9 +120,13 @@
         "ADD_AS_TASK": "Adicionar como Tarefa",
         "SHOW_TASK": "Mostrar Tarefa",
         "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong>!",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} outros eventos estão pendentes)",
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} outros eventos estão pendentes)"
+        },
         "TXT_PAST": "<strong>{{title}}</strong> iniciou em <strong>{{start}}</strong>!",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> iniciou em <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} outros eventos estão pendentes)"
+        "TXT_PAST_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> iniciou em <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} outros eventos estão pendentes)"
+        }
       },
       "EVENT_STRINGS": {
         "EVENT_STR": "Evento",
@@ -226,7 +230,7 @@
       "FORM": {
         "HOST": "Endereço do servidor (ex: https://try.gitea.io)",
         "REPO_FULL_NAME": "Nome do usuário ou organização/projeto",
-        "REPO_FULL_NAME_DESCRIPTION": "Pode ser encontrado como parte da url, ao acessar o projeto no navegador",
+        "REPO_FULL_NAME_DESCRIPTION": "Pode ser encontrado como parte da URL, ao acessar o projeto no navegador",
         "SCOPE": "Escopo",
         "SCOPE_ALL": "Todos",
         "SCOPE_ASSIGNED": "Atribuídos a mim",
@@ -652,7 +656,7 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Requer que o módulo de controle de tempo seja habilitado para o projeto OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Mostrar caixa de diálogo de controle de tempo quando as subtarefas forem concluídas",
         "PROJECT_ID": "ID do projeto",
-        "PROJECT_ID_DESCRIPTION": "Pode ser encontrado como parte da url, ao visualizar o projeto no navegador.",
+        "PROJECT_ID_DESCRIPTION": "Pode ser encontrado como parte da URL, ao visualizar o projeto no navegador.",
         "SCOPE": "Escopo",
         "SCOPE_ALL": "Todos",
         "SCOPE_ASSIGNED": "Atribuído a mim",
@@ -777,7 +781,7 @@
         "API_KEY": "Chave de acesso API",
         "HOST": "Hospedar (e.g.: https://redmine.org)",
         "PROJECT_ID": "Identificador do projeto",
-        "PROJECT_ID_DESCRIPTION": "Pode ser encontrado como parte da url, ao visualizar o projeto no Navegador.",
+        "PROJECT_ID_DESCRIPTION": "Pode ser encontrado como parte da URL, ao visualizar o projeto no Navegador.",
         "SCOPE": "Escopo",
         "SCOPE_ALL": "Todos",
         "SCOPE_ASSIGNED": "Definido para mim",
@@ -803,7 +807,9 @@
       "COUNTDOWN_BANNER": {
         "START_NOW": "Iniciar agora",
         "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outras tarefas estão pendentes)"
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outras tarefas estão pendentes)"
+        }
       },
       "S_ACTIVE_TASK_DUE": "A tarefa em que está a trabalhar atualmente já tem prazo de validade!<br/> ({{title}})",
       "S_REMINDER_ERR": "Erro na interface do lembrete"
@@ -939,7 +945,7 @@
           "CORS_INFO": "<strong>Experimental !!</strong> Para fazer isso funcionar, você precisa desabilitar ou limitar o CORS para sua instância Nextcloud, o que pode ter implicações de segurança negativas! Por favor, <a href='https://github.com/nextcloud/server/issues/3131'>consulte esta discussão</a> para obter mais informações. Use por sua conta e risco!",
           "D_SYNC_FOLDER_PATH": "Caminho relativo à raiz do servidor WebDAV onde os ficheiros de sincronização serão armazenados (ex., ' /super-productivity' ou ' /'). Este NÃO é o caminho interno do diretório do seu servidor.",
           "INFO": "As implementações WebDAV diferem muito, infelizmente. Sabe-se que o Super Productivity funciona bem com o Nextcloud, <strong>mas pode não funcionar com o seu fornecedor</strong>.",
-          "L_BASE_URL": "Url Base",
+          "L_BASE_URL": "URL Base",
           "L_PASSWORD": "Senha",
           "L_SYNC_FOLDER_PATH": "Caminho da pasta de sincronização",
           "L_TEST_CONNECTION": "Testar ligação",
@@ -1316,9 +1322,9 @@
         "SORT_CREATION_DATE": "Data de Criação",
         "SORT_DEFAULT": "Padrão",
         "SORT_NAME": "Nome",
-        "SORT_PERMANENT": "Ordenar (permanente)",
+        "SAVE_SORT": "Guardar como predefinido",
         "SORT_SCHEDULED_DATE": "Data Agendada",
-        "SORT_TEMPORARY": "Ordenar (temporário)",
+        "SORT": "Ordenar",
         "TIME_1HOUR": "> 1 Hora",
         "TIME_2HOUR": "> 2 Horas",
         "TIME_10MIN": "> 10 Minutos",
@@ -1856,8 +1862,8 @@
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Adicionar tarefas a partir de hoje",
     "ARCHIVED_TASKS": {
-      "PLURAL": "{{count}} tarefas principais concluídas foram arquivadas",
-      "SINGULAR": "{{count}} tarefa principal concluída foi arquivada"
+      "ONE": "{{count}} tarefa principal concluída foi arquivada",
+      "OTHER": "{{count}} tarefas principais concluídas foram arquivadas"
     },
     "BREAK_LABEL": "Pausa (nr / time)",
     "CELEBRATE": "Tome um momento para <i>comemorar!</i>",

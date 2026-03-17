@@ -120,9 +120,13 @@
         "ADD_AS_TASK": "Ajouter une Tâche",
         "SHOW_TASK": "Afficher la tâche",
         "TXT": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners}} autres événements sont prévus)",
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners}} autres événements sont prévus)"
+        },
         "TXT_PAST": "<strong>{{title}}</strong> a commencé à <strong>{{start}}</strong> !",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> a commencé à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners}} autres événements sont prévus)"
+        "TXT_PAST_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> a commencé à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners}} autres événements sont prévus)"
+        }
       },
       "EVENT_STRINGS": {
         "EVENT_STR": "Événement",
@@ -652,7 +656,7 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Nécessite l'activation du module de suivi du temps pour le projet OpenProject",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Afficher la boîte de dialogue de suivi du temps lorsque les sous-tâches sont terminées",
         "PROJECT_ID": "identifiant du projet",
-        "PROJECT_ID_DESCRIPTION": "Peut être trouvé dans l'url, lors de la visualisation du projet dans le navigateur.",
+        "PROJECT_ID_DESCRIPTION": "Peut être trouvé dans l'URL, lors de la visualisation du projet dans le navigateur.",
         "SCOPE": "Portée",
         "SCOPE_ALL": "Tout",
         "SCOPE_ASSIGNED": "Assigné à moi",
@@ -803,7 +807,9 @@
       "COUNTDOWN_BANNER": {
         "START_NOW": "Commencer maintenant",
         "TXT": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners}} autres tâches sont dues)"
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> commence à <strong>{{start}}</strong> !<br> (et {{nrOfOtherBanners}} autres tâches sont dues)"
+        }
       },
       "S_ACTIVE_TASK_DUE": "La tâche sur laquelle vous travaillez actuellement est arrivée à échéance !<br/> ({{title}})",
       "S_REMINDER_ERR": "Erreur pour l'interface de rappel"
@@ -1316,9 +1322,9 @@
         "SORT_CREATION_DATE": "Date de création",
         "SORT_DEFAULT": "Par défaut",
         "SORT_NAME": "Nom",
-        "SORT_PERMANENT": "Trier (permanent)",
+        "SAVE_SORT": "Enregistrer par défaut",
         "SORT_SCHEDULED_DATE": "Date prévue",
-        "SORT_TEMPORARY": "Trier (temporaire)",
+        "SORT": "Trier",
         "TIME_1HOUR": "> 1 Heure",
         "TIME_2HOUR": "> 2 Heures",
         "TIME_10MIN": "> 10 Minutes",
@@ -1856,8 +1862,8 @@
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Ajouter des tâches d'aujourd'hui",
     "ARCHIVED_TASKS": {
-      "PLURAL": "{{count}} tâches parentes terminées ont été archivées",
-      "SINGULAR": "{{count}} tâche parente terminée a été archivée"
+      "ONE": "{{count}} tâche parente terminée a été archivée",
+      "OTHER": "{{count}} tâches parentes terminées ont été archivées"
     },
     "BREAK_LABEL": "Pauses (nr / heure)",
     "CELEBRATE": "Prenez un moment pour célébrer <i>!</i>",

@@ -6,7 +6,7 @@ test.describe('App Features - Time Tracking', () => {
     // elements on main page
     const workViewPage = new WorkViewPage(page, testPrefix);
     const firstTask = page.locator('task').first();
-    const firstTaskHandle = firstTask.locator('.drag-handle');
+    const firstTaskHandle = firstTask.locator('.drag-handle').first();
     const taskPlayButton = page
       .locator('task')
       .getByRole('button', { name: 'Start tracking time' });
@@ -38,7 +38,7 @@ test.describe('App Features - Time Tracking', () => {
     await expect(timeTrackingSwitch).not.toBeChecked();
 
     // Navigate to main view
-    await page.goto('/#/tag/TODAY');
+    await page.goto('/#/tag/TODAY/tasks');
     // Play button in main button bar should not be present when feature is disabled
     await expect(mainPlayButton).not.toBeAttached();
     // Play button in the task hover menu should not be visible
@@ -63,7 +63,7 @@ test.describe('App Features - Time Tracking', () => {
     await expect(timeTrackingSwitch).toBeChecked();
 
     // Go back to main view and expect play button to be visible
-    await page.goto('/#/tag/TODAY');
+    await page.goto('/#/tag/TODAY/tasks');
     await expect(mainPlayButton).toBeAttached();
 
     await firstTask.hover();

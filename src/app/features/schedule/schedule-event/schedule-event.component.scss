@@ -82,8 +82,7 @@
     .title {
       flex: 0 1 auto;
       column-width: auto;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      @include truncateText();
     }
 
     .ico-wrapper {
@@ -120,7 +119,7 @@
   }
 
   &.CalendarEvent {
-    border-left: 1px solid var(--extra-border-color);
+    @include extraBorder('-left');
   }
 
   &.ScheduledRepeatProjection .ico {
@@ -194,7 +193,7 @@
   height: 13px;
   text-align: center;
   padding: 1px;
-  border: 1px solid var(--extra-border-color);
+  @include extraBorder();
   border-radius: var(--card-border-radius);
   color: var(--text-color);
   background: var(--bg-lighter);
@@ -292,8 +291,7 @@
 
 .title {
   font-size: 14px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  @include truncateText();
   flex: 1 1 auto;
   padding: 6px;
   font-weight: 400;

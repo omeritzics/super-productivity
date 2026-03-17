@@ -48,7 +48,7 @@
         "EDIT_ATTACHMENT": "Editar anexo",
         "LABELS": {
           "IMG": "Imagem",
-          "LINK": "Url"
+          "LINK": "URL"
         },
         "SELECT_TYPE": "Selecione um tipo",
         "TYPES": {
@@ -120,9 +120,13 @@
         "ADD_AS_TASK": "Adicionar como tarefa",
         "SHOW_TASK": "Mostrar Tarefa",
         "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outros eventos estão atrasados)",
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outros eventos estão atrasados)"
+        },
         "TXT_PAST": "<strong>{{title}}</strong> iniciado em <strong>{{start}}</strong> !",
-        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> iniciado em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outros eventos estão atrasados)"
+        "TXT_PAST_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> iniciado em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outros eventos estão atrasados)"
+        }
       },
       "EVENT_STRINGS": {
         "EVENT_STR": "Evento",
@@ -727,8 +731,8 @@
       },
       "FORM_THEME": {
         "HELP": "Configurações de tema para seu projeto.",
-        "L_BACKGROUND_IMAGE_DARK": "Url da imagem de fundo (tema escuro)",
-        "L_BACKGROUND_IMAGE_LIGHT": "Url da imagem de fundo (tema claro)",
+        "L_BACKGROUND_IMAGE_DARK": "URL da imagem de fundo (tema escuro)",
+        "L_BACKGROUND_IMAGE_LIGHT": "URL da imagem de fundo (tema claro)",
         "L_COLOR_ACCENT": "Cor de destaque",
         "L_COLOR_PRIMARY": "Cor primária",
         "L_COLOR_WARN": "Cor de aviso/erro",
@@ -803,7 +807,9 @@
       "COUNTDOWN_BANNER": {
         "START_NOW": "Comece agora",
         "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !",
-        "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outras tarefas estão atrasados)"
+        "TXT_MULTIPLE": {
+          "OTHER": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong> !<br> (e {{nrOfOtherBanners}} outras tarefas estão atrasados)"
+        }
       },
       "S_ACTIVE_TASK_DUE": "A tarefa na qual você está trabalhando atualmente está atrasada!<br/> ( {{title}})",
       "S_REMINDER_ERR": "Erro na interface de lembrete"
@@ -1316,9 +1322,9 @@
         "SORT_CREATION_DATE": "Data de Criação",
         "SORT_DEFAULT": "Padrão",
         "SORT_NAME": "Nome",
-        "SORT_PERMANENT": "Ordenar (permanente)",
+        "SAVE_SORT": "Salvar como padrão",
         "SORT_SCHEDULED_DATE": "Data Agendada",
-        "SORT_TEMPORARY": "Ordenar (temporário)",
+        "SORT": "Ordenar",
         "TIME_1HOUR": "> 1 Hora",
         "TIME_2HOUR": "> 2 Horas",
         "TIME_10MIN": "> 10 Minutos",
@@ -1856,8 +1862,8 @@
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Adicionar tarefas de hoje",
     "ARCHIVED_TASKS": {
-      "PLURAL": "{{count}} tarefas pai concluídas foram arquivadas",
-      "SINGULAR": "{{count}} tarefa pai concluída foi arquivada"
+      "ONE": "{{count}} tarefa pai concluída foi arquivada",
+      "OTHER": "{{count}} tarefas pai concluídas foram arquivadas"
     },
     "BREAK_LABEL": "Pausas (nr / tempo)",
     "CELEBRATE": "Tire um momento para <i>comemorar!</i>",

@@ -91,7 +91,6 @@ h2 {
   justify-content: center;
   padding: 5px 0;
   user-select: none;
-  -webkit-user-select: none; /* Safari */
 
   .item {
     margin: 0 calc(1.5 * var(--s));
@@ -235,8 +234,7 @@ finish-day-btn,
 
     button {
       min-width: 160px;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      @include truncateText();
       margin-left: var(--s);
       margin-bottom: var(--s);
 
@@ -273,10 +271,7 @@ finish-day-btn,
 
   .no-tasks-label {
     font-size: 17px;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    @include center;
     text-align: center;
     font-weight: 400;
     color: #333;
@@ -315,7 +310,7 @@ finish-day-btn,
 }
 
 :host collapsible.isExpanded ::ng-deep .collapsible-header {
-  border-bottom: 1px solid var(--extra-border-color);
+  @include extraBorder('-bottom');
 }
 
 .overdue-tasks {
@@ -329,4 +324,8 @@ finish-day-btn,
   align-items: center;
   padding-bottom: 8px;
   padding-top: 8px;
+}
+
+.repeat-cfg-list {
+  padding: var(--s-half);
 }

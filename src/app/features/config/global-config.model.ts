@@ -105,7 +105,7 @@ export type PomodoroConfig = Readonly<{
   duration?: number | null;
   breakDuration?: number | null;
   longerBreakDuration?: number | null;
-  cyclesBeforeLongerBreak: number;
+  cyclesBeforeLongerBreak?: number | null;
 }>;
 
 // NOTE: needs to be writable due to how we use it
@@ -194,6 +194,8 @@ export type ReminderConfig = Readonly<{
   isFocusWindow?: boolean;
   // Android only: use alarm-style notifications (louder, more intrusive)
   useAlarmStyleReminders?: boolean;
+  notifyOnDueDate?: boolean;
+  dueDateNotificationHour?: number;
 }>;
 
 export type TrackingReminderConfigOld = Readonly<{

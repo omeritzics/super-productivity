@@ -49,7 +49,7 @@
   justify-content: center;
   align-items: center;
   padding: 8px 0;
-  border-radius: 4px;
+  border-radius: var(--card-border-radius);
   font-size: 18px;
 
   mat-icon:last-of-type {
@@ -71,7 +71,8 @@
 }
 
 .normal-tasks,
-.scheduled {
+.scheduled,
+.deadlines {
   margin-top: 4px;
   display: flex;
   flex-direction: column;
@@ -84,7 +85,8 @@
 }
 
 .normal-tasks-items,
-.scheduled-items {
+.scheduled-items,
+.deadline-items {
   min-height: var(--planner-item-height);
   flex-grow: 1;
 }
@@ -152,6 +154,7 @@
 
   > :nth-child(2) {
     flex-grow: 1;
+    min-width: 0;
   }
 }
 

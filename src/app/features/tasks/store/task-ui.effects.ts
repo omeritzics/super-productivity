@@ -16,7 +16,11 @@ import {
   throttleTime,
   withLatestFrom,
 } from 'rxjs/operators';
-import { selectCurrentTask, selectCurrentTaskId } from './task.selectors';
+import {
+  selectCurrentTask,
+  selectCurrentTaskId,
+  selectUnplannedDeadlineTasksForToday,
+} from './task.selectors';
 import { NotifyService } from '../../../core/notify/notify.service';
 import { TaskService } from '../task.service';
 import { selectConfigFeatureState } from '../../config/store/global-config.reducer';
@@ -31,6 +35,7 @@ import { playDoneSound } from '../util/play-done-sound';
 import { Task } from '../task.model';
 import { EMPTY } from 'rxjs';
 import { selectProjectById } from '../../project/store/project.selectors';
+import { Project } from '../../project/project.model';
 import { Router } from '@angular/router';
 import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
@@ -61,7 +66,11 @@ export class TaskUiEffects {
               .select(selectProjectById, { id: task.projectId as string })
               .pipe(
                 first(),
-                map((project) => ({ project, task, activeContextTaskIds })),
+                map((project) => ({
+                  project: project ?? null,
+                  task,
+                  activeContextTaskIds,
+                })),
               );
           } else {
             return [{ project: null, task, activeContextTaskIds }];
@@ -212,6 +221,7 @@ export class TaskUiEffects {
         switchMap(([{ targetProjectId, task }]) =>
           this._store$.select(selectProjectById, { id: targetProjectId }).pipe(
             first(),
+            filter((project): project is Project => !!project),
             map((project) => ({ project, task })),
           ),
         ),
@@ -262,4 +272,46 @@ export class TaskUiEffects {
       ),
     });
   }
+
+  deadlineTodayBanner$ = createEffect(
+    () =>
+      this._store$.select(selectUnplannedDeadlineTasksForToday).pipe(
+        skipWhileApplyingRemoteOps(),
+        distinctUntilChanged(
+          (a, b) => a.length === b.length && a.every((t, i) => t.id === b[i].id),
+        ),
+        tap((tasks) => {
+          if (tasks.length > 0) {
+            this._bannerService.open({
+              id: BannerId.DeadlinesToday,
+              ico: 'flag',
+              msg: T.F.TASK.B.DEADLINES_TODAY,
+              translateParams: { count: tasks.length },
+              action: {
+                label: T.F.TASK.B.ADD_ALL_TO_TODAY,
+                fn: () => {
+                  // Re-select fresh data to avoid stale closure
+                  this._store$
+                    .select(selectUnplannedDeadlineTasksForToday)
+                    .pipe(first())
+                    .subscribe((currentTasks) => {
+                      if (currentTasks.length > 0) {
+                        this._store$.dispatch(
+                          TaskSharedActions.planTasksForToday({
+                            taskIds: currentTasks.map((t) => t.id),
+                          }),
+                        );
+                      }
+                    });
+                },
+              },
+              hideWhen$: this._store$
+                .select(selectUnplannedDeadlineTasksForToday)
+                .pipe(filter((t) => t.length === 0)),
+            });
+          }
+        }),
+      ),
+    { dispatch: false },
+  );
 }

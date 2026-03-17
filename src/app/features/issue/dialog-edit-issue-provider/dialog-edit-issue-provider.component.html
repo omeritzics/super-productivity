@@ -5,10 +5,14 @@
 <!--@let model = isEdit ? d.issueProvider : DEFAULT_ISSUE_PROVIDER_CFGS[issueProviderKey];-->
 
 <h1 mat-dialog-title>
-  <mat-icon
-    class="dialog-header-icon"
-    [svgIcon]="issueProviderKey | issueIcon"
-  ></mat-icon>
+  @if (issueProviderKey | issueIcon; as icon) {
+    <mat-icon
+      class="dialog-header-icon"
+      [svgIcon]="icon"
+    ></mat-icon>
+  } @else {
+    <mat-icon class="dialog-header-icon">extension</mat-icon>
+  }
   <!-- TODO improve title -->
 
   {{ isEdit ? 'Edit' : 'Setup' }} {{ title }} Config
@@ -156,6 +160,15 @@
     </button>
 
     @if (isEdit) {
+      <button
+        (click)="duplicate()"
+        color="primary"
+        mat-button
+        type="button"
+      >
+        <mat-icon>content_copy</mat-icon>
+        {{ T.G.DUPLICATE | translate }}
+      </button>
       <button
         (click)="remove()"
         color="warn"
