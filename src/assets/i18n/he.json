@@ -23,6 +23,8 @@
     "PRESS_ENTER_AGAIN": "יש ללחוץ שוב על Enter כדי לשמור"
   },
   "DIALOG_UNSPLASH_PICKER": {
+    "BY": "מאת",
+    "NO_RESULTS": "לא נמצאו תמונות. נא לנסות מילות חיפש אחרות.",
     "SEARCH_LABEL": "חיפוש תמונות",
     "SEARCH_PLACEHOLDER": "לדוגמה טבע, הרים, מופשט",
     "TITLE": "בחירת תמונת רקע מתוך Unsplash"
@@ -41,6 +43,7 @@
         },
         "SELECT_TYPE": "נא לבחור סוג",
         "TYPES": {
+          "LINK": "קישור (נפתח בדפדפן האינטרנט)"
         }
       }
     },
@@ -78,6 +81,8 @@
     },
     "CALDAV": {
       "FORM": {
+        "CALDAV_PASSWORD": "הסיסמה שלך ל־CalDAV",
+        "CALDAV_USER": "שם המשתמש שלך ל־CalDAV"
       },
       "FORM_SECTION": {
       },
@@ -92,10 +97,12 @@
     },
     "NEXTCLOUD_DECK": {
       "FORM": {
+        "USERNAME": "שם המשתמש שלך ל־Nextcloud"
       },
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
+        "ASSIGNED_USERS": "משתמשים ממונים",
         "LABELS": "תוויות"
       },
       "S": {
@@ -119,6 +126,7 @@
     },
     "VOICE_REMINDER": {
       "FORM": {
+        "L_TEXT": "טקסט",
         "TITLE": "תזכורת קולית"
       }
     },
@@ -128,6 +136,7 @@
     },
     "D_RATE": {
       "A_HOW": "איך והיכן לדרג",
+      "BTN_DONT_BOTHER": "לא לשאול אותי שוב",
       "TITLE": "🙈 אנחנו מצטערים, אבל...",
       "TXT": "ביכולתך לעזור מאוד למיזם שלנו בעזרת <strong>מתן דירוג גבוה אם אהבת את היישום!</strong>"
     },
@@ -171,6 +180,7 @@
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "אדם ממונה",
         "DESCRIPTION": "תיאור",
         "LABELS": "תוויות",
         "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
@@ -187,6 +197,7 @@
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "אדם ממונה",
         "DESCRIPTION": "תיאור",
         "LABELS": "תוויות",
         "LAST_COMMENT": "תגובה אחרונה",
@@ -218,6 +229,7 @@
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "אדם ממונה",
         "DESCRIPTION": "תיאור",
         "LABELS": "תוויות",
         "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
@@ -300,6 +312,9 @@
         }
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "אדם ממונה",
+        "ATTACHMENTS": "קבצים מצורפים",
+        "COMPONENTS": "רכיבים",
         "DESCRIPTION": "תיאור",
         "LIST_OF_CHANGES": "רשימת שינויים",
         "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
@@ -370,6 +385,7 @@
         "TIME_SPENT": "זמן שהושקע"
       },
       "DIALOG_TRANSITION": {
+        "CURRENT_ASSIGNEE": "אדם ממונה נוכחי:",
         "CURRENT_STATUS": "מצב נוכחי:",
         "PERCENTAGE_DONE": "התקדמות:",
         "TASK_NAME": "שם משימה:"
@@ -383,7 +399,10 @@
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "אדם ממונה",
+        "ATTACHMENTS": "קבצים מצורפים",
         "DESCRIPTION": "תיאור",
+        "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
         "STATUS": "מצב",
         "SUMMARY": "סיכום",
         "TYPE": "סוג"
@@ -465,7 +484,9 @@
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
+        "AUTHOR": "כותב/ת",
         "DESCRIPTION": "תיאור",
+        "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
         "PRIORITY": "עדיפות",
         "STATUS": "מצב"
       },
@@ -493,6 +514,7 @@
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
+        "OK": "קדימה!"
       },
       "D_EDIT": {
         "CURRENT_STREAK": "שיא נוכחי",
@@ -593,6 +615,7 @@
       "D_DELETE": {
       },
       "D_EDIT": {
+        "LABEL": "תגיות"
       },
       "FORM_BASIC": {
         "L_ICON": "סמל",
@@ -616,9 +639,11 @@
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "קבצים מצורפים",
         "TIME": "משך זמן"
       },
       "ADD_TASK_BAR": {
+        "TAGS_BUTTON": "תגיות",
         "TODAY": "היום"
       },
       "B": {
@@ -667,10 +692,12 @@
       "D_DELETE_INSTANCE": {
       },
       "D_EDIT": {
-        "HEATMAP_LABEL": "פעילות"
+        "HEATMAP_LABEL": "פעילות",
+        "TAG_LABEL": "תגיות"
       },
       "F": {
         "C_MONTH": "חודש",
+        "C_WEEK": "שבוע",
         "C_YEAR": "שנה"
       }
     },
@@ -697,10 +724,12 @@
     },
     "WORKLOG": {
       "CMP": {
+        "TASKS": "משימות"
       },
       "EXPORT": {
         "O": {
-          "DATE": "תאריך"
+          "DATE": "תאריך",
+          "TAGS": "תגיות"
         }
       },
       "WEEK": {
@@ -716,44 +745,88 @@
   },
   "G": {
     "ADD": "הוספה",
+    "ADVANCED_CFG": "הגדרה מתקדמת",
     "CANCEL": "ביטול",
+    "DO_IT": "קדימה!",
+    "SAVE": "שמירה",
     "TITLE": "כותרת",
     "TODAY_TAG_TITLE": "היום"
   },
   "GCF": {
     "APP_FEATURES": {
+      "HABITS": "הרגלים",
+      "SEARCH": "חיפוש"
     },
     "AUTO_BACKUPS": {
     },
     "CALENDARS": {
+      "CAL_PATH": "כתובת מקור ה־iCal"
     },
     "CLIPBOARD_IMAGES": {
+      "DELETE": "מחיקת תמונה",
+      "DELETE_ALL": "למחוק הכול",
+      "DELETE_ALL_SUCCESS": "כל התמונות נמחקו בהצלחה מלוח הגזירים",
+      "DELETE_SUCCESS": "התמונה נמחקה בהצלחה מלוח הגזירים",
+      "LOADING": "התמונות נטענות...",
+      "MANAGE_TITLE": "ניהול תמונות מאוחסנות",
+      "MANAGER_TITLE": "תמונות מלוח הגזירים",
+      "OPEN_MANAGER": "ניהול תמונות",
+      "SELECT_PATH": "בחירת תיקייה",
+      "SORT_BY": "מיון לפי",
+      "SORT_LARGEST": "הגדולה תחילה",
+      "SORT_NEWEST": "החדשה תחילה",
+      "SORT_OLDEST": "הישנה תחילה",
+      "SORT_SMALLEST": "הקטנה תחילה",
+      "TITLE": "תמונות מלוח הגזירים"
     },
     "EVALUATION": {
     },
     "FOCUS_MODE": {
+      "TITLE": "מצב מיקוד"
     },
     "IDLE": {
     },
     "IMEX": {
+      "TITLE": "ייבוא/ייצוא"
     },
     "KEYBOARD": {
+      "ADD_NEW_NOTE": "הוספת הערה חדשה",
+      "ADD_NEW_PROJECT": "הוספת מיזם חדש",
+      "ADD_NEW_TASK": "הוספת משימה חדשה",
+      "GLOBAL_ADD_NOTE": "הוספת הערה חדשה",
+      "GLOBAL_ADD_TASK": "הוספת משימה חדשה",
+      "TASK_SHORTCUTS": "משימות"
     },
     "LANG": {
+      "TIME_LOCALE_AUTO": "ברירת המחדל של המערכת",
+      "TIME_LOCALE_DE_DE": "גרמניה וישראל: 24 שעות, DD.MM.YYYY",
+      "TITLE": "שפה"
     },
     "MISC": {
-      "THEME": "ערכת נושא"
+      "DARK_MODE": "עיצוב כהה",
+      "DARK_MODE_DARK": "כהה",
+      "DARK_MODE_LIGHT": "בהיר",
+      "DARK_MODE_SYSTEM": "לפי המערכת",
+      "FIRST_DAY_OF_WEEK": "היום הראשון בשבוע",
+      "IS_DARK_MODE": "עיצוב כהה",
+      "THEME": "ערכת נושא",
+      "TITLE": "הגדרות שונות"
     },
     "TASKS": {
+      "TITLE": "משימות"
     },
     "POMODORO": {
     },
     "REMINDER": {
+      "TITLE": "תזכורות"
     },
     "SCHEDULE": {
-      "MONTH": "חודש"
+      "LUNCH_BREAK_START_END_DESCRIPTION": "למשל 13:00",
+      "MONTH": "חודש",
+      "WORK_START_END_DESCRIPTION": "למשל 17:00"
     },
     "SHORT_SYNTAX": {
+      "TITLE": "תחביר קצר"
     },
     "SOUND": {
     },
@@ -766,17 +839,54 @@
   },
   "GLOBAL_RELATIVE_TIME": {
     "FUTURE": {
+      "AN_HOUR": "בעוד שעה",
+      "A_DAY": "בעוד יום",
+      "A_MINUTE": "בעוד דקה",
+      "A_MONTH": "בעוד חודש",
+      "A_YEAR": "בעוד שנה",
+      "DAYS": "בעוד {{count}} ימים",
+      "FEW_SECONDS": "בעוד כמה שניות",
+      "HOURS": "בעוד {{count}} שעות",
+      "MINUTES": "בעוד {{count}} דקות",
+      "MONTHS": "בעוד {{count}} חודשים",
+      "YEARS": "בעוד {{count}} שנים"
     },
     "PAST": {
+      "AN_HOUR": "לפני שעה",
+      "A_DAY": "לפני יום",
+      "A_MINUTE": "לפני דקה",
+      "A_MONTH": "לפני חודש",
+      "A_YEAR": "לפני שנה",
+      "DAYS": "לפני {{count}} ימים",
+      "FEW_SECONDS": "לפני כמה שניות",
+      "HOURS": "לפני {{count}} שעות",
+      "MINUTES": "לפני {{count}} דקות",
+      "MONTHS": "לפני {{count}} חודשים",
+      "YEARS": "לפני {{count}} שנים"
     }
   },
   "GLOBAL_SNACK": {
+    "FILE_DOWNLOADED_BTN": "פתיחת תיקייה",
+    "NO_TASKS_TO_COPY": "אין משימות להעתקה"
   },
   "GPB": {
+    "SYNC": "הנתונים מסתנכרנים..."
   },
   "MH": {
+    "ADD_NEW_TASK": "הוספת משימה חדשה",
+    "CREATE_PROJECT": "יצירת מיזם",
+    "HABITS": "הרגלים",
+    "HELP": "עזרה",
     "HM": {
-    }
+      "CONTRIBUTE": "הירתמות",
+      "REPORT_A_PROBLEM": "דיווח על בעיה"
+    },
+    "SEARCH": "חיפוש",
+    "SETTINGS": "הגדרות",
+    "TAGS": "תגיות",
+    "TASKS": "משימות",
+    "TASK_LIST": "רשימת משימות",
+    "TOGGLE_SHOW_BOOKMARKS": "הצגת/הסתרת סימניות"
   },
   "PRE_MIGRATION": {
   },
@@ -784,25 +894,42 @@
     "ARCHIVED_TASKS": {
     },
     "D_CONFIRM_APP_CLOSE": {
-    }
+      "OK": "יציאה"
+    },
+    "START_END": "התחלה - סיום",
+    "WEEK": "שבוע"
   },
   "PLUGINS": {
     "CANCEL": "ביטול",
     "CAPABILITIES": {
-    }
+    },
+    "ERROR": "שגיאה",
+    "ID": "מזהה:",
+    "LANGUAGES": "שפות:",
+    "OK": "אישור",
+    "PERMISSIONS": "הרשאות"
   },
   "PM": {
   },
   "PS": {
+    "PRIVACY_POLICY": "מדיניות פרטיות",
     "TABS": {
+      "TASKS": "משימות"
     }
   },
   "SCHEDULE": {
   },
   "THEMES": {
+    "amber": "ענבר",
+    "blue": "כחול",
+    "blue-grey": "כחול אפרפר",
+    "pink": "ורוד"
   },
   "USER_PROFILES": {
-    "CANCEL": "ביטול"
+    "CANCEL": "ביטול",
+    "PROFILE_NAME": "שם הפרופיל",
+    "RENAME": "שינוי שם",
+    "SAVE": "שמירה"
   },
   "V": {
   },
