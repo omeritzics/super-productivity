@@ -2,11 +2,15 @@
   "APP": {
     "B_INSTALL": {
       "IGNORE": "התעלמות",
-      "INSTALL": "התקנה"
+      "INSTALL": "התקנה",
+      "MSG": "האם ברצונך להתקין את Super Productivity בתור יישום אינטרנטי (PWA)?"
     },
+    "B_OFFLINE": "אין לך חיבור לאינטרנט. הסנכרון והמשיכה מספק המשימות לביצוע לא יעבדו.",
     "CONTEXT_MENU": {
       "CHANGE_BACKGROUND": "שינוי רקע"
-    }
+    },
+    "SKIP_SYNC_WAIT": "דילוג על ההמתנה לסנכרון",
+    "UPDATE_WEB_APP": "יש גרסה חדשה זמינה. לטעון את הגרסה החדשה?"
   },
   "BL": {
   },
@@ -16,20 +20,26 @@
   "CONFIRM": {
   },
   "DATETIME_SCHEDULE": {
+    "PRESS_ENTER_AGAIN": "יש ללחוץ שוב על Enter כדי לשמור"
   },
   "DIALOG_UNSPLASH_PICKER": {
     "SEARCH_LABEL": "חיפוש תמונות",
-    "SEARCH_PLACEHOLDER": "לדוגמה טבע, הרים, מופשט"
+    "SEARCH_PLACEHOLDER": "לדוגמה טבע, הרים, מופשט",
+    "TITLE": "בחירת תמונת רקע מתוך Unsplash"
   },
   "DONATE_PAGE": {
+    "BUTTON_TEXT": "תרומה באמצעות GitHub Sponsors"
   },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
+        "ADD_ATTACHMENT": "הוספת קובץ מצורף",
+        "EDIT_ATTACHMENT": "עריכת קובץ מצורף",
         "LABELS": {
           "IMG": "תמונה",
           "LINK": "כתובת"
         },
+        "SELECT_TYPE": "נא לבחור סוג",
         "TYPES": {
         }
       }
@@ -37,17 +47,33 @@
     "BOARDS": {
       "DEFAULT": {
         "DONE": "בוצע",
+        "EISENHAUER_MATRIX": "מטריצת אייזנהאואר",
         "IN_PROGRESS": "בתהליך",
+        "NOT_URGENT_IMPORTANT": "חשוב ולא דחוף",
+        "NOT_URGENT_NOT_IMPORTANT": "לא דחוף ולא חשוב",
+        "TO_DO": "מטלה",
         "URGENT": "דחוף",
         "URGENT_IMPORTANT": "דחוף וחשוב",
         "URGENT_NOT_IMPORTANT": "דחוף ולא חשוב"
       },
       "FORM": {
+        "ADD_NEW_PANEL": "הוספת לוחית חדשה",
         "BACKLOG_TASK_FILTER_ALL": "הכול",
-        "TASK_DONE_STATE_ALL": "הכול"
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "החרגה",
+        "TAGS_EXCLUDED": "תגיות מוחרגות",
+        "TAGS_REQUIRED": "תגיות נחוצות",
+        "TASK_DONE_STATE": "מצב השלמת משימה",
+        "TASK_DONE_STATE_ALL": "הכול",
+        "TASK_DONE_STATE_DONE": "הושלמה",
+        "TASK_DONE_STATE_UNDONE": "לא הושלמה"
       },
       "V": {
-        "CREATE_NEW_TAG_BTN": "יצירת תגית"
+        "ADD_NEW_BOARD": "הוספת לוח חדש",
+        "CONFIRM_DELETE": "למחוק לוח זה?",
+        "CREATE_NEW_TAGS_BTN": "יצירת תגיות",
+        "CREATE_NEW_TAG_BTN": "יצירת תגית",
+        "EDIT_BOARD": "עריכת לוח",
+        "NO_PANELS_BTN": "הגדרת לוח"
       }
     },
     "CALDAV": {
@@ -77,8 +103,12 @@
     },
     "CALENDARS": {
       "BANNER": {
+        "ADD_AS_TASK": "הוספה כמשימה",
+        "SHOW_TASK": "הצגת משימה"
       },
       "EVENT_STRINGS": {
+        "EVENTS_STR": "אירועים",
+        "EVENT_STR": "אירוע"
       },
       "S": {
       }
@@ -89,6 +119,7 @@
     },
     "VOICE_REMINDER": {
       "FORM": {
+        "TITLE": "תזכורת קולית"
       }
     },
     "DROPBOX": {
@@ -96,6 +127,9 @@
       }
     },
     "D_RATE": {
+      "A_HOW": "איך והיכן לדרג",
+      "TITLE": "🙈 אנחנו מצטערים, אבל...",
+      "TXT": "ביכולתך לעזור מאוד למיזם שלנו בעזרת <strong>מתן דירוג גבוה אם אהבת את היישום!</strong>"
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
@@ -105,17 +139,33 @@
       "ADD_TIME_MINUTE": "הוספת דקה אחת",
       "B": {
         "PAUSE": "השהיה",
+        "RESUME": "המשך",
         "START": "התחלה"
       },
+      "CLICK_TO_EDIT_DURATION": "יש ללחוץ כדי לערוך את משך הזמן",
       "COUNTDOWN": "ספירה לאחור",
+      "FOCUS_TIME_TOOLTIP": "זמן מיקוד",
       "GOGOGO": "קדימה, קדימה, קדימה!!!",
       "LONG_BREAK": "הפסקה ארוכה",
+      "PAUSE_BREAK": "השהיית הפסקה",
+      "PAUSE_TRACKING": "השהיית מעקב",
+      "POMODORO": "פומודורו",
+      "POMODORO_SESSION_COMPLETED": "סבב הפומודורו הסתיים!",
       "POMODORO_SETTINGS": "הגדרות פומודורו",
-      "SHORT_BREAK": "הפסקה קצרה"
+      "PREP_SIT_UPRIGHT": "ישיבה (או עמידה) ישרה",
+      "REMOVE_TIME_MINUTE": "ניכוי דקה",
+      "RESUME_BREAK": "המשך הפסקה",
+      "SELECT_MODE": "נא לבחור את מצב המיקוד",
+      "SHORT_BREAK": "הפסקה קצרה",
+      "SKIP_BREAK": "דילוג על ההפסקה",
+      "START_BREAK": "התחלת הפסקה",
+      "SWITCH_TASK": "החלפת משימה"
     },
     "GITEA": {
       "FORM": {
+        "HOST": "מארח (למשל https://try.gitea.io)",
         "SCOPE_ALL": "הכול",
+        "SCOPE_CREATED": "נוצרו על ידיי",
         "TOKEN": "אסימון גישה"
       },
       "FORM_SECTION": {
@@ -123,9 +173,11 @@
       "ISSUE_CONTENT": {
         "DESCRIPTION": "תיאור",
         "LABELS": "תוויות",
+        "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
         "PROJECT": "מיזם",
         "STATUS": "מצב",
-        "SUMMARY": "סיכום"
+        "SUMMARY": "סיכום",
+        "WRITE_A_COMMENT": "נא לכתוב הערה"
       }
     },
     "GITHUB": {
@@ -137,19 +189,27 @@
       "ISSUE_CONTENT": {
         "DESCRIPTION": "תיאור",
         "LABELS": "תוויות",
+        "LAST_COMMENT": "תגובה אחרונה",
+        "LOAD_ALL_COMMENTS": "טעינת כל {{nr}} התגובות",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "טעינת התיאור וכל התגובות",
+        "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
         "STATUS": "מצב",
-        "SUMMARY": "סיכום"
+        "SUMMARY": "סיכום",
+        "WRITE_A_COMMENT": "נא לכתוב הערה"
       },
       "S": {
       }
     },
     "GITLAB": {
       "DIALOG_SUBMIT_WORKLOG": {
+        "T_ALREADY_TRACKED": "כבר במעקב",
         "T_TITLE": "כותרת",
         "T_TO_BE_SUBMITTED": "לשליחה"
       },
       "FORM": {
         "SCOPE_ALL": "הכול",
+        "SCOPE_CREATED": "נוצרו על ידיי",
+        "SOURCE": "מקור",
         "SOURCE_GLOBAL": "הכול",
         "SOURCE_GROUP": "קבוצה",
         "SOURCE_PROJECT": "מיזם",
@@ -160,25 +220,38 @@
       "ISSUE_CONTENT": {
         "DESCRIPTION": "תיאור",
         "LABELS": "תוויות",
+        "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
         "PROJECT": "מיזם",
         "STATUS": "מצב",
-        "SUMMARY": "סיכום"
+        "SUMMARY": "סיכום",
+        "WRITE_A_COMMENT": "נא לכתוב הערה"
       },
       "S": {
       }
     },
     "ISSUE": {
       "DEFAULT": {
+        "ISSUES_STR": "בעיות",
+        "ISSUE_STR": "בעיה"
       },
       "HOW_TO_GET_A_TOKEN": "איך לקבל אסימון?",
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "אדם ממונה",
+        "ATTACHMENTS": "קבצים מצורפים",
+        "AUTHOR": "כותב/ת",
         "CATEGORY": "קטגוריה",
+        "COMPONENTS": "רכיבים",
         "DESCRIPTION": "תיאור",
         "DUE_DATE": "תאריך יעד",
         "LABELS": "תוויות",
+        "LAST_COMMENT": "תגובה אחרונה",
+        "LOAD_ALL_COMMENTS": "טעינת כל {{nr}} התגובות",
         "LOCATION": "מיקום",
+        "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
         "PRIORITY": "עדיפות",
+        "START": "התחלה",
         "STATUS": "מצב",
+        "SUB_TASKS": "משימות משניות",
         "SUMMARY": "סיכום",
         "TIME_SPENT": "זמן שהושקע",
         "TYPE": "סוג",
@@ -195,27 +268,45 @@
       "BANNER": {
       },
       "CFG_CMP": {
+        "ENABLE": "הפעלת שילוב עם Jira",
+        "LOAD_SUGGESTIONS": "טעינת הצעות"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
+        "OK": "קדימה!"
       },
       "DIALOG_INITIAL": {
       },
       "DIALOG_TRANSITION": {
+        "CURRENT_ASSIGNEE": "אדם ממונה נוכחי:",
+        "CURRENT_STATUS": "מצב נוכחי:",
+        "TASK_NAME": "שם משימה:"
       },
       "DIALOG_WORKLOG": {
         "CHECKBOXES": {
-        }
+        },
+        "SAVE_WORKLOG": "שמירת יומן עבודה",
+        "TIME_SPENT": "זמן שהושקע"
       },
       "FORM_ADV": {
       },
       "FORM_CRED": {
+        "PASSWORD": "אסימון / סיסמה",
+        "USER_NAME": "דוא״ל / שם משתמש"
       },
       "FORM_SECTION": {
+        "ADV_CFG": "הגדרה מתקדמת",
         "HELP_ARR": {
+          "H1": "הגדרה בסיסית"
         }
       },
       "ISSUE_CONTENT": {
-        "DESCRIPTION": "תיאור"
+        "DESCRIPTION": "תיאור",
+        "LIST_OF_CHANGES": "רשימת שינויים",
+        "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
+        "STATUS": "מצב",
+        "SUB_TASKS": "משימות משניות",
+        "SUMMARY": "סיכום",
+        "WRITE_A_COMMENT": "נא לכתוב הערה"
       },
       "S": {
       },
@@ -237,6 +328,7 @@
         "YEAR": "שנה"
       },
       "EVAL_FORM": {
+        "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "התפלגות תפוקה שבועית"
       },
       "FOCUS_SESSION_DIALOG": {
         "ADD_BTN": "הוספה",
@@ -248,6 +340,8 @@
     "NOTE": {
       "D_FULLSCREEN": {
         "TOOLBAR": {
+          "BOLD": "מודגש",
+          "CODE_BLOCK": "קטע קוד",
           "HEADING_1": "כותרת 1",
           "HEADING_2": "כותרת 2",
           "HEADING_3": "כותרת 3",
@@ -272,15 +366,18 @@
       "CFG_CMP": {
       },
       "DIALOG_TRACK_TIME": {
-        "ACTIVITY": "פעילות"
+        "ACTIVITY": "פעילות",
+        "TIME_SPENT": "זמן שהושקע"
       },
       "DIALOG_TRANSITION": {
         "CURRENT_STATUS": "מצב נוכחי:",
-        "PERCENTAGE_DONE": "התקדמות:"
+        "PERCENTAGE_DONE": "התקדמות:",
+        "TASK_NAME": "שם משימה:"
       },
       "FORM": {
         "PROJECT_ID": "מזהה מיזם",
         "SCOPE_ALL": "הכול",
+        "SCOPE_CREATED": "נוצרו על ידיי",
         "TOKEN": "אסימון גישה"
       },
       "FORM_SECTION": {
@@ -294,6 +391,7 @@
       "ISSUE_STRINGS": {
       },
       "S": {
+        "ERR_NO_FILE": "לא נבחר קובץ"
       }
     },
     "PLANNER": {
@@ -301,7 +399,9 @@
         "ADD_PLANNED": {
         }
       },
+      "NO_TASKS": "אין משימות",
       "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "אין משימות מתוזמנות"
       },
       "S": {
       }
@@ -311,7 +411,9 @@
     },
     "PROJECT": {
       "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
-        "CANCEL": "ביטול"
+        "CANCEL": "ביטול",
+        "OK": "שכפול בכל מקרה",
+        "TITLE": "לשכפל את המיזם?"
       },
       "D_CREATE": {
         "CREATE": "יצירת מיזם",
@@ -320,6 +422,7 @@
       "D_DELETE": {
       },
       "FORM_BASIC": {
+        "L_IS_HIDDEN_FROM_MENU": "הסתרת המיזם מהתפריט",
         "L_TITLE": "שם מיזם",
         "TITLE": "הגדרות בסיסיות"
       },
@@ -334,23 +437,37 @@
     },
     "PROJECT_FOLDER": {
       "DIALOG": {
-        "CREATE_TITLE": "יצירת תיקייה"
+        "CREATE_TITLE": "יצירת תיקייה",
+        "EDIT_TITLE": "עריכת תיקייה",
+        "NAME_LABEL": "שם תיקייה"
       },
       "SELECT": {
-      }
+        "LABEL": "תיקייה",
+        "PLACEHOLDER": "בחירת תיקייה"
+      },
+      "TOOLTIP_CREATE": "יצירת תיקיית מיזם",
+      "TOOLTIP_VISIBILITY": "הצגת/הסתרת מיזמים"
     },
     "QUICK_HISTORY": {
+      "NO_DATA": "אין נתונים לשנה הנוכחית",
+      "PAGE_TITLE": "היסטוריה מהירה"
     },
     "REDMINE": {
       "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "פעילות",
+        "TIME_SPENT": "זמן שהושקע"
       },
       "FORM": {
-        "SCOPE_ALL": "הכול"
+        "PROJECT_ID": "מזהה מיזם",
+        "SCOPE_ALL": "הכול",
+        "SCOPE_CREATED": "נוצרו על ידיי"
       },
       "FORM_SECTION": {
       },
       "ISSUE_CONTENT": {
-        "DESCRIPTION": "תיאור"
+        "DESCRIPTION": "תיאור",
+        "PRIORITY": "עדיפות",
+        "STATUS": "מצב"
       },
       "S": {
       }
@@ -359,11 +476,18 @@
     },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
+        "START_NOW": "התחלה כעת"
       }
     },
     "SCHEDULE": {
       "D_INITIAL": {
-      }
+      },
+      "INSERT_BEFORE": "לפני",
+      "LUNCH_BREAK": "הפסקת צהריים",
+      "MONTH": "חודש",
+      "NOW": "כעת",
+      "PLAN_END_DAY": "סוף {{date}}",
+      "PLAN_START_DAY": "תחילת {{date}}"
     },
     "SEARCH_BAR": {
     },
@@ -371,10 +495,18 @@
       "D_CONFIRM_REMOVE": {
       },
       "D_EDIT": {
+        "CURRENT_STREAK": "שיא נוכחי",
+        "DAYS": "ימים"
       },
       "FORM": {
+        "L_ICON": "סמל",
+        "L_TITLE": "כותרת",
+        "L_TYPE": "סוג",
+        "TYPE_STOPWATCH": "שעון עצר"
       },
       "HABIT_TRACKER": {
+        "TODAY": "היום",
+        "ADD_HABIT": "הוספת הרגל חדש"
       },
       "S": {
       }
@@ -382,29 +514,50 @@
     "SYNC": {
       "A": {
       },
+      "BTN_SYNC_NOW": "סנכרון כעת",
+      "BTN_RESTORE_FROM_HISTORY": "שחזור מההיסטוריה",
       "C": {
       },
       "D_AUTH_CODE": {
       },
       "D_CONFLICT": {
+        "ADDITIONAL_INFO": "מידע נוסף",
+        "CHANGES": "שינויים",
+        "CHANGES_SINCE_LAST_SYNC": "שינויים מאז הסנכרון האחרון",
+        "DATE": "תאריך",
+        "LAST_SYNC": "סנכרון אחרון:",
+        "LAST_SYNCED": "מועד סנכרון אחרון",
+        "NEVER": "אף פעם"
       },
       "D_DECRYPT_ERROR": {
+        "PASSWORD": "סיסמה"
       },
       "D_ENTER_PASSWORD": {
+        "PASSWORD_LABEL": "סיסמת הצפנה",
+        "BTN_SAVE_AND_SYNC": "שמירה וסנכרון"
       },
       "D_FRESH_CLIENT_CONFIRM": {
       },
       "D_SYNC_IMPORT_CONFLICT": {
+        "USE_LOCAL": "שימוש בנתונים הקיימים",
+        "USE_REMOTE": "שימוש בנתונים מהשרת"
       },
       "D_LOCAL_DATA_REPLACE_CONFIRM": {
       },
       "D_INCOMPLETE_SYNC": {
+        "BTN_CLOSE_APP": "סגירת יישום",
+        "BTN_DOWNLOAD_BACKUP": "הורדת גיבוי מקומי",
+        "T3": "יש לך שתי אפשרויות:"
       },
       "D_INITIAL_CFG": {
+        "TITLE": "הגדרת סנכרון"
       },
       "D_PERMISSION": {
+        "DISABLE_SYNC": "השבתת סנכרון",
+        "PERM_FILE": "מתן הרשאה"
       },
       "D_RESTORE": {
+        "TITLE": "שחזור מההיסטוריה"
       },
       "FORM": {
         "DROPBOX": {
@@ -414,12 +567,14 @@
         "LOCAL_FILE": {
         },
         "SUPER_SYNC": {
+          "L_ACCESS_TOKEN": "אסימון גישה"
         },
         "IMPORT_ENCRYPTION_WARNING": {
         },
         "FILE_BASED": {
         },
         "WEB_DAV": {
+          "L_PASSWORD": "סיסמה"
         }
       },
       "S": {
@@ -433,12 +588,15 @@
     },
     "TAG": {
       "D_CREATE": {
+        "CREATE": "יצירת תגית"
       },
       "D_DELETE": {
       },
       "D_EDIT": {
       },
       "FORM_BASIC": {
+        "L_ICON": "סמל",
+        "TITLE": "הגדרות בסיסיות"
       },
       "S": {
       },
@@ -447,14 +605,21 @@
     },
     "TAG_FOLDER": {
       "DIALOG": {
+        "CREATE_TITLE": "יצירת תיקייה",
+        "EDIT_TITLE": "עריכת תיקייה",
+        "NAME_LABEL": "שם תיקייה"
       },
       "SELECT": {
+        "LABEL": "תיקייה",
+        "PLACEHOLDER": "בחירת תיקייה"
       }
     },
     "TASK": {
       "ADDITIONAL_INFO": {
+        "TIME": "משך זמן"
       },
       "ADD_TASK_BAR": {
+        "TODAY": "היום"
       },
       "B": {
       },
@@ -467,15 +632,21 @@
       "D_CONFIRM_DELETE": {
       },
       "D_REMINDER_VIEW": {
-        "DONE": "בוצע"
+        "DONE": "בוצע",
+        "START": "התחלה"
       },
       "D_SCHEDULE_TASK": {
+        "RO_NEVER": "אף פעם"
       },
       "D_SELECT_DATE_AND_TIME": {
+        "DATE": "תאריך"
       },
       "D_TIME": {
+        "TIME_SPENT": "זמן שהושקע",
+        "TITLE": "משך זמן"
       },
       "D_TIME_FOR_DAY": {
+        "TINE_SPENT": "זמן שהושקע"
       },
       "N": {
       },
@@ -496,12 +667,20 @@
       "D_DELETE_INSTANCE": {
       },
       "D_EDIT": {
+        "HEATMAP_LABEL": "פעילות"
       },
       "F": {
+        "C_MONTH": "חודש",
+        "C_YEAR": "שנה"
       }
     },
     "TASK_VIEW": {
       "CUSTOMIZER": {
+        "FILTER_PROJECT": "מיזם",
+        "FILTER_TIME_SPENT": "זמן שהושקע",
+        "GROUP_PROJECT": "מיזם",
+        "SCHEDULED_TODAY": "היום",
+        "TIME_SPENT": "זמן שהושקע"
       }
     },
     "TIME_TRACKING": {
@@ -521,9 +700,11 @@
       },
       "EXPORT": {
         "O": {
+          "DATE": "תאריך"
         }
       },
       "WEEK": {
+        "TITLE": "כותרת"
       }
     }
   },
@@ -534,6 +715,10 @@
   "MIGRATE": {
   },
   "G": {
+    "ADD": "הוספה",
+    "CANCEL": "ביטול",
+    "TITLE": "כותרת",
+    "TODAY_TAG_TITLE": "היום"
   },
   "GCF": {
     "APP_FEATURES": {
@@ -557,6 +742,7 @@
     "LANG": {
     },
     "MISC": {
+      "THEME": "ערכת נושא"
     },
     "TASKS": {
     },
@@ -565,6 +751,7 @@
     "REMINDER": {
     },
     "SCHEDULE": {
+      "MONTH": "חודש"
     },
     "SHORT_SYNTAX": {
     },
@@ -600,6 +787,7 @@
     }
   },
   "PLUGINS": {
+    "CANCEL": "ביטול",
     "CAPABILITIES": {
     }
   },
@@ -614,6 +802,7 @@
   "THEMES": {
   },
   "USER_PROFILES": {
+    "CANCEL": "ביטול"
   },
   "V": {
   },
