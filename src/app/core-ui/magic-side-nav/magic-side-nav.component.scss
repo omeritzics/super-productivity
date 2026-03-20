@@ -1,3 +1,5 @@
+@use '../../../styles/_globals.scss' as *;
+
 :host {
   --sidenav-width-expanded: var(--side-nav-width, 260px);
   --mobile-breakpoint: 768px;
@@ -36,7 +38,7 @@
   background: var(--sidenav-bg);
   border: 1px solid var(--sidenav-border-color);
   border-radius: 8px;
-  padding: 8px;
+  padding: var(--s);
   cursor: pointer;
   transition: var(--transition-standard);
   color: var(--text-color);
@@ -98,13 +100,13 @@
 
   // Milkglass effect when background image is present (light theme)
   :host-context(.hasBgImage) & {
-    background: rgba(255, 255, 255, 0.5);
+    background: var(--c-light-50);
     backdrop-filter: blur(20px) saturate(180%);
   }
 
   // Milkglass effect for dark theme with background image
   :host-context(.isDarkTheme.hasBgImage) & {
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--c-dark-50);
     backdrop-filter: blur(20px) saturate(180%);
   }
 
@@ -124,7 +126,7 @@
   &.mobile {
     width: var(--sidenav-width-expanded);
     background: var(--sidenav-bg-mobile);
-    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
+    box-shadow: 4px 0 16px var(--c-dark-30);
     // Remove CSS transitions - let Angular animations handle it
     transition: none !important;
   }
@@ -146,7 +148,7 @@
     }
 
     &.mobile {
-      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.3);
+      box-shadow: -4px 0 16px var(--c-dark-30);
     }
   }
 
@@ -199,7 +201,7 @@
   flex-direction: column;
   justify-content: flex-start;
 
-  @media (max-width: 600px) {
+  @include mq(xs, max) {
     padding-top: var(--safe-area-top);
     padding-bottom: calc(var(--safe-area-bottom) + var(--bottom-nav-height));
   }
@@ -210,11 +212,11 @@
 }
 
 .nav-item {
-  margin-bottom: 2px;
+  margin-bottom: var(--s-quarter);
   -webkit-app-region: no-drag;
 
   &.has-children {
-    margin-bottom: 4px;
+    margin-bottom: var(--s-half);
   }
 }
 
