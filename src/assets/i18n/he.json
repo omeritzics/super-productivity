@@ -3,7 +3,7 @@
     "B_INSTALL": {
       "IGNORE": "התעלמות",
       "INSTALL": "התקנה",
-      "MSG": "האם ברצונך להתקין את Super Productivity בתור יישום אינטרנטי (PWA)?"
+      "MSG": "האם ברצונך להתקין את Super Productivity בתור יישום אינטרנט מתקדם (PWA)?"
     },
     "B_OFFLINE": "אין לך חיבור לאינטרנט. הסנכרון והמשיכה מספק המשימות לביצוע לא יעבדו.",
     "CONTEXT_MENU": {
@@ -18,6 +18,7 @@
     "SHOW_NOTES": "הערות מיזם"
   },
   "CONFIRM": {
+    "AUTO_FIX": "נראה שהנתונים שלך נפגמו (\"{{validityError}}\"). האם ברצונך לנסות לתקן אותם אוטומטית? זה עשוי לגרום לאיבוד נתונים חלקי."
   },
   "DATETIME_SCHEDULE": {
     "PRESS_ENTER_AGAIN": "יש ללחוץ שוב על Enter כדי לשמור"
@@ -43,6 +44,7 @@
         },
         "SELECT_TYPE": "נא לבחור סוג",
         "TYPES": {
+          "IMG": "תמונה (מוצגת כממוזערת)",
           "LINK": "קישור (נפתח בדפדפן האינטרנט)"
         }
       }
@@ -52,6 +54,7 @@
         "DONE": "בוצע",
         "EISENHAUER_MATRIX": "מטריצת אייזנהאואר",
         "IN_PROGRESS": "בתהליך",
+        "KANBAN": "קאנבאן",
         "NOT_URGENT_IMPORTANT": "חשוב ולא דחוף",
         "NOT_URGENT_NOT_IMPORTANT": "לא דחוף ולא חשוב",
         "TO_DO": "מטלה",
@@ -73,8 +76,8 @@
       "V": {
         "ADD_NEW_BOARD": "הוספת לוח חדש",
         "CONFIRM_DELETE": "למחוק לוח זה?",
-        "CREATE_NEW_TAGS_BTN": "יצירת תגיות",
         "CREATE_NEW_TAG_BTN": "יצירת תגית",
+        "CREATE_NEW_TAGS_BTN": "יצירת תגיות",
         "EDIT_BOARD": "עריכת לוח",
         "NO_PANELS_BTN": "הגדרת לוח"
       }
@@ -82,7 +85,12 @@
     "CALDAV": {
       "FORM": {
         "CALDAV_PASSWORD": "הסיסמה שלך ל־CalDAV",
-        "CALDAV_USER": "שם המשתמש שלך ל־CalDAV"
+        "CALDAV_USER": "שם המשתמש שלך ל־CalDAV",
+        "TWO_WAY_SYNC_BOTH": "גם וגם (דו־כיווני)",
+        "TWO_WAY_SYNC_OFF": "כבוי",
+        "TWO_WAY_SYNC_PULL_ONLY": "משיכה בלבד (קריאה מתוך CalDAV)",
+        "TWO_WAY_SYNC_PUSH_ONLY": "דחיפה בלבד (כתיבה אל CalDAV)",
+        "TWO_WAY_SYNC_SECTION": "סנכרון דו־כיווני (ניסיוני)"
       },
       "FORM_SECTION": {
       },
@@ -93,44 +101,32 @@
         "SUMMARY": "סיכום"
       },
       "S": {
-      }
-    },
-    "NEXTCLOUD_DECK": {
-      "FORM": {
-        "USERNAME": "שם המשתמש שלך ל־Nextcloud"
-      },
-      "FORM_SECTION": {
-      },
-      "ISSUE_CONTENT": {
-        "ASSIGNED_USERS": "משתמשים ממונים",
-        "LABELS": "תוויות"
-      },
-      "S": {
+        "CALENDAR_NOT_FOUND": "‏CalDAV: לוח השנה„{{calendarName}}” לא נמצא",
+        "CALENDAR_READ_ONLY": "‏CalDAV: לוח השנה„{{calendarName}}” מיועד לקריאה בלבד"
       }
     },
     "CALENDARS": {
       "BANNER": {
         "ADD_AS_TASK": "הוספה כמשימה",
-        "SHOW_TASK": "הצגת משימה"
+        "SHOW_TASK": "הצגת משימה",
+        "TXT": "<strong>{{title}}</strong> מתחיל במועד <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": {
+        },
+        "TXT_PAST_MULTIPLE": {
+        }
       },
       "EVENT_STRINGS": {
-        "EVENTS_STR": "אירועים",
-        "EVENT_STR": "אירוע"
+        "EVENT_STR": "אירוע",
+        "EVENTS_STR": "אירועים"
       },
       "S": {
+        "CAL_PROVIDER_ERROR": "שגיאת ספק לוח שנה: {{errTxt}}"
       }
+    },
+    "CLIPBOARD_IMAGE": {
+      "PASTE_SUCCESS": "התמונה הודבקה בהצלחה"
     },
     "CONFIG": {
-      "S": {
-      }
-    },
-    "VOICE_REMINDER": {
-      "FORM": {
-        "L_TEXT": "טקסט",
-        "TITLE": "תזכורת קולית"
-      }
-    },
-    "DROPBOX": {
       "S": {
       }
     },
@@ -139,6 +135,10 @@
       "BTN_DONT_BOTHER": "לא לשאול אותי שוב",
       "TITLE": "🙈 אנחנו מצטערים, אבל...",
       "TXT": "ביכולתך לעזור מאוד למיזם שלנו בעזרת <strong>מתן דירוג גבוה אם אהבת את היישום!</strong>"
+    },
+    "DROPBOX": {
+      "S": {
+      }
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
@@ -157,6 +157,7 @@
       "GOGOGO": "קדימה, קדימה, קדימה!!!",
       "LONG_BREAK": "הפסקה ארוכה",
       "PAUSE_BREAK": "השהיית הפסקה",
+      "PAUSE_SESSION": "השהיית סבב",
       "PAUSE_TRACKING": "השהיית מעקב",
       "POMODORO": "פומודורו",
       "POMODORO_SESSION_COMPLETED": "סבב הפומודורו הסתיים!",
@@ -165,14 +166,17 @@
       "REMOVE_TIME_MINUTE": "ניכוי דקה",
       "RESUME_BREAK": "המשך הפסקה",
       "SELECT_MODE": "נא לבחור את מצב המיקוד",
+      "SESSION_COMPLETED": "סבב המיקוד הסתיים!",
       "SHORT_BREAK": "הפסקה קצרה",
       "SKIP_BREAK": "דילוג על ההפסקה",
       "START_BREAK": "התחלת הפסקה",
-      "SWITCH_TASK": "החלפת משימה"
+      "SWITCH_TASK": "החלפת משימה",
+      "WORKED_FOR": "עבדת על"
     },
     "GITEA": {
       "FORM": {
         "HOST": "מארח (למשל https://try.gitea.io)",
+        "REPO_FULL_NAME": "שם משתמש או שם ארגון/מאגר",
         "SCOPE_ALL": "הכול",
         "SCOPE_CREATED": "נוצרו על ידיי",
         "TOKEN": "אסימון גישה"
@@ -190,27 +194,6 @@
         "WRITE_A_COMMENT": "נא לכתוב הערה"
       }
     },
-    "GITHUB": {
-      "FORM": {
-        "TOKEN": "אסימון גישה"
-      },
-      "FORM_SECTION": {
-      },
-      "ISSUE_CONTENT": {
-        "ASSIGNEE": "אדם ממונה",
-        "DESCRIPTION": "תיאור",
-        "LABELS": "תוויות",
-        "LAST_COMMENT": "תגובה אחרונה",
-        "LOAD_ALL_COMMENTS": "טעינת כל {{nr}} התגובות",
-        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "טעינת התיאור וכל התגובות",
-        "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
-        "STATUS": "מצב",
-        "SUMMARY": "סיכום",
-        "WRITE_A_COMMENT": "נא לכתוב הערה"
-      },
-      "S": {
-      }
-    },
     "GITLAB": {
       "DIALOG_SUBMIT_WORKLOG": {
         "T_ALREADY_TRACKED": "כבר במעקב",
@@ -218,6 +201,8 @@
         "T_TO_BE_SUBMITTED": "לשליחה"
       },
       "FORM": {
+        "FILTER": "סינון מותאם אישית",
+        "PROJECT_HINT": "למשל super-productivity/super-productivity",
         "SCOPE_ALL": "הכול",
         "SCOPE_CREATED": "נוצרו על ידיי",
         "SOURCE": "מקור",
@@ -239,12 +224,16 @@
         "WRITE_A_COMMENT": "נא לכתוב הערה"
       },
       "S": {
+        "ERR_UNKNOWN": "‏GitLab: שגיאה לא ידועה {{statusCode}} {{errorMsg}}"
       }
     },
     "ISSUE": {
       "DEFAULT": {
-        "ISSUES_STR": "בעיות",
-        "ISSUE_STR": "בעיה"
+        "ISSUE_STR": "בעיה",
+        "ISSUES_STR": "בעיות"
+      },
+      "DIALOG": {
+        "ADVANCED_CONFIG": "הגדרה מתקדמת"
       },
       "HOW_TO_GET_A_TOKEN": "איך לקבל אסימון?",
       "ISSUE_CONTENT": {
@@ -261,6 +250,7 @@
         "LOCATION": "מיקום",
         "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
         "PRIORITY": "עדיפות",
+        "RELATED": "קשור",
         "START": "התחלה",
         "STATUS": "מצב",
         "SUB_TASKS": "משימות משניות",
@@ -270,6 +260,15 @@
         "VERSION": "גרסה"
       },
       "S": {
+        "CONNECTION_FAILED": "החיבור נכשל",
+        "CONNECTION_SUCCESS": "החיבור עובד!"
+      },
+      "TWO_WAY_SYNC": {
+        "BOTH": "גם וגם (דו־כיווני)",
+        "OFF": "כבוי",
+        "PULL_ONLY": "משיכה בלבד",
+        "PUSH_ONLY": "דחיפה בלבד",
+        "SECTION": "סנכרון דו־כיווני (ניסיוני)"
       }
     },
     "ISSUE_PANEL": {
@@ -318,6 +317,7 @@
         "DESCRIPTION": "תיאור",
         "LIST_OF_CHANGES": "רשימת שינויים",
         "MARK_AS_CHECKED": "סימון שהעדכונים נבדקו",
+        "RELATED": "קשור",
         "STATUS": "מצב",
         "SUB_TASKS": "משימות משניות",
         "SUMMARY": "סיכום",
@@ -328,9 +328,6 @@
       "STEPPER": {
         "WELCOME_USER": "ברוך בואך, {{user}}!"
       }
-    },
-    "CLIPBOARD_IMAGE": {
-      "PASTE_SUCCESS": "התמונה הודבקה בהצלחה"
     },
     "MARKDOWN_PASTE": {
     },
@@ -352,6 +349,19 @@
       "REFLECTION": {
       }
     },
+    "NEXTCLOUD_DECK": {
+      "FORM": {
+        "USERNAME": "שם המשתמש שלך ל־Nextcloud"
+      },
+      "FORM_SECTION": {
+      },
+      "ISSUE_CONTENT": {
+        "ASSIGNED_USERS": "משתמשים ממונים",
+        "LABELS": "תוויות"
+      },
+      "S": {
+      }
+    },
     "NOTE": {
       "D_FULLSCREEN": {
         "TOOLBAR": {
@@ -370,9 +380,9 @@
           "TASK_LIST": "רשימת משימות"
         }
       },
-      "NOTES_CMP": {
-      },
       "NOTE_CMP": {
+      },
+      "NOTES_CMP": {
       },
       "S": {
       }
@@ -497,7 +507,10 @@
     },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
-        "START_NOW": "התחלה כעת"
+        "START_NOW": "התחלה כעת",
+        "TXT": "<strong>{{title}}</strong> מתחיל במועד <strong>{{start}}</strong>!",
+        "TXT_MULTIPLE": {
+        }
       }
     },
     "SCHEDULE": {
@@ -527,8 +540,8 @@
         "TYPE_STOPWATCH": "שעון עצר"
       },
       "HABIT_TRACKER": {
-        "TODAY": "היום",
-        "ADD_HABIT": "הוספת הרגל חדש"
+        "ADD_HABIT": "הוספת הרגל חדש",
+        "TODAY": "היום"
       },
       "S": {
       }
@@ -536,8 +549,8 @@
     "SYNC": {
       "A": {
       },
-      "BTN_SYNC_NOW": "סנכרון כעת",
       "BTN_RESTORE_FROM_HISTORY": "שחזור מההיסטוריה",
+      "BTN_SYNC_NOW": "סנכרון כעת",
       "C": {
       },
       "D_AUTH_CODE": {
@@ -551,20 +564,18 @@
         "LAST_SYNCED": "מועד סנכרון אחרון",
         "NEVER": "אף פעם"
       },
+      "D_DATA_REPAIR_CONFIRM": {
+      },
+      "D_DATA_REPAIRED": {
+      },
       "D_DECRYPT_ERROR": {
         "PASSWORD": "סיסמה"
       },
       "D_ENTER_PASSWORD": {
-        "PASSWORD_LABEL": "סיסמת הצפנה",
-        "BTN_SAVE_AND_SYNC": "שמירה וסנכרון"
+        "BTN_SAVE_AND_SYNC": "שמירה וסנכרון",
+        "PASSWORD_LABEL": "סיסמת הצפנה"
       },
       "D_FRESH_CLIENT_CONFIRM": {
-      },
-      "D_SYNC_IMPORT_CONFLICT": {
-        "USE_LOCAL": "שימוש בנתונים הקיימים",
-        "USE_REMOTE": "שימוש בנתונים מהשרת"
-      },
-      "D_LOCAL_DATA_REPLACE_CONFIRM": {
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "סגירת יישום",
@@ -574,6 +585,8 @@
       "D_INITIAL_CFG": {
         "TITLE": "הגדרת סנכרון"
       },
+      "D_LOCAL_DATA_REPLACE_CONFIRM": {
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "השבתת סנכרון",
         "PERM_FILE": "מתן הרשאה"
@@ -581,29 +594,31 @@
       "D_RESTORE": {
         "TITLE": "שחזור מההיסטוריה"
       },
+      "D_SERVER_MIGRATION_CONFIRM": {
+      },
+      "D_SYNC_IMPORT_CONFLICT": {
+        "USE_LOCAL": "שימוש בנתונים הקיימים",
+        "USE_REMOTE": "שימוש בנתונים מהשרת"
+      },
       "FORM": {
         "DROPBOX": {
         },
+        "FILE_BASED": {
+        },
         "GOOGLE": {
+        },
+        "IMPORT_ENCRYPTION_WARNING": {
         },
         "LOCAL_FILE": {
         },
         "SUPER_SYNC": {
           "L_ACCESS_TOKEN": "אסימון גישה"
         },
-        "IMPORT_ENCRYPTION_WARNING": {
-        },
-        "FILE_BASED": {
-        },
         "WEB_DAV": {
           "L_PASSWORD": "סיסמה"
         }
       },
       "S": {
-      },
-      "D_DATA_REPAIRED": {
-      },
-      "D_DATA_REPAIR_CONFIRM": {
       },
       "SAFETY_BACKUP": {
       }
@@ -638,23 +653,27 @@
       }
     },
     "TASK": {
-      "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "קבצים מצורפים",
-        "TIME": "משך זמן"
-      },
       "ADD_TASK_BAR": {
         "TAGS_BUTTON": "תגיות",
         "TODAY": "היום"
+      },
+      "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "קבצים מצורפים",
+        "TIME": "משך זמן"
       },
       "B": {
       },
       "CMP": {
       },
+      "D_CONFIRM_DELETE": {
+      },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
       },
-      "D_CONFIRM_DELETE": {
+      "D_DEADLINE": {
+        "QA_TODAY": "היום",
+        "RO_NEVER": "אף פעם"
       },
       "D_REMINDER_VIEW": {
         "DONE": "בוצע",
@@ -715,11 +734,17 @@
       },
       "B_TTR": {
       },
+      "D_ARCHIVE_COMPRESS": {
+      },
       "D_IDLE": {
       },
       "D_TRACKING_REMINDER": {
-      },
-      "D_ARCHIVE_COMPRESS": {
+      }
+    },
+    "VOICE_REMINDER": {
+      "FORM": {
+        "L_TEXT": "טקסט",
+        "TITLE": "תזכורת קולית"
       }
     },
     "WORKLOG": {
@@ -741,13 +766,13 @@
     "DIALOG_CONFIRM_URL_IMPORT": {
     }
   },
-  "MIGRATE": {
-  },
   "G": {
     "ADD": "הוספה",
     "ADVANCED_CFG": "הגדרה מתקדמת",
     "CANCEL": "ביטול",
+    "CLOSE": "סגירה",
     "DO_IT": "קדימה!",
+    "REMOVE": "הסרה",
     "SAVE": "שמירה",
     "TITLE": "כותרת",
     "TODAY_TAG_TITLE": "היום"
@@ -812,9 +837,6 @@
       "THEME": "ערכת נושא",
       "TITLE": "הגדרות שונות"
     },
-    "TASKS": {
-      "TITLE": "משימות"
-    },
     "POMODORO": {
     },
     "REMINDER": {
@@ -832,18 +854,24 @@
     },
     "TAKE_A_BREAK": {
     },
+    "TASKS": {
+      "TITLE": "משימות"
+    },
     "TIME_TRACKING": {
+      "L_IS_TRACKING_REMINDER_ENABLED": "הפעלת תזכורת למעקב",
+      "TITLE": "מעקב זמן"
     }
   },
   "GLOBAL": {
+    "COPY_SUFFIX": " (העתקה)"
   },
   "GLOBAL_RELATIVE_TIME": {
     "FUTURE": {
-      "AN_HOUR": "בעוד שעה",
       "A_DAY": "בעוד יום",
       "A_MINUTE": "בעוד דקה",
       "A_MONTH": "בעוד חודש",
       "A_YEAR": "בעוד שנה",
+      "AN_HOUR": "בעוד שעה",
       "DAYS": "בעוד {{count}} ימים",
       "FEW_SECONDS": "בעוד כמה שניות",
       "HOURS": "בעוד {{count}} שעות",
@@ -852,11 +880,11 @@
       "YEARS": "בעוד {{count}} שנים"
     },
     "PAST": {
-      "AN_HOUR": "לפני שעה",
       "A_DAY": "לפני יום",
       "A_MINUTE": "לפני דקה",
       "A_MONTH": "לפני חודש",
       "A_YEAR": "לפני שנה",
+      "AN_HOUR": "לפני שעה",
       "DAYS": "לפני {{count}} ימים",
       "FEW_SECONDS": "לפני כמה שניות",
       "HOURS": "לפני {{count}} שעות",
@@ -866,6 +894,7 @@
     }
   },
   "GLOBAL_SNACK": {
+    "COPY_TO_CLIPPBOARD": "הועתק ללוח הגזירים",
     "FILE_DOWNLOADED_BTN": "פתיחת תיקייה",
     "NO_TASKS_TO_COPY": "אין משימות להעתקה"
   },
@@ -884,11 +913,13 @@
     "SEARCH": "חיפוש",
     "SETTINGS": "הגדרות",
     "TAGS": "תגיות",
-    "TASKS": "משימות",
     "TASK_LIST": "רשימת משימות",
+    "TASKS": "משימות",
     "TOGGLE_SHOW_BOOKMARKS": "הצגת/הסתרת סימניות"
   },
-  "PRE_MIGRATION": {
+  "MIGRATE": {
+  },
+  "NOTIFICATION": {
   },
   "PDS": {
     "ARCHIVED_TASKS": {
@@ -907,14 +938,29 @@
     "ID": "מזהה:",
     "LANGUAGES": "שפות:",
     "OK": "אישור",
-    "PERMISSIONS": "הרשאות"
+    "PERMISSIONS": "הרשאות",
+    "REMOVE": "הסרה",
+    "RISK_MALICIOUS_CODE": "תוספים זדוניים עלולים לגנוב ממך מידע רגיש או לפגום את הנתונים שלך",
+    "TYPE": "סוג: {{type}}",
+    "UNKNOWN_ERROR": "אירעה שגיאה לא ידועה",
+    "VALIDATION_FAILED": "האימות נכשל"
   },
   "PM": {
   },
+  "PRE_MIGRATION": {
+    "DIALOG_TITLE": "עדכון מערכת"
+  },
   "PS": {
+    "GLOBAL_SETTINGS": "הגדרות מקיפות",
+    "PLUGINS": "תוספים",
     "PRIVACY_POLICY": "מדיניות פרטיות",
+    "RELOAD": "רענון",
     "TABS": {
-      "TASKS": "משימות"
+      "GENERAL": "כללי",
+      "PLUGINS": "תוספים",
+      "SYNC_BACKUP": "סנכרון וגיבוי",
+      "TASKS": "משימות",
+      "TIME_TRACKING": "זמן ומעקב"
     }
   },
   "SCHEDULE": {
@@ -923,16 +969,40 @@
     "amber": "ענבר",
     "blue": "כחול",
     "blue-grey": "כחול אפרפר",
-    "pink": "ורוד"
+    "deep-orange": "כתום כהה",
+    "deep-purple": "סגול כהה",
+    "green": "ירוק",
+    "indigo": "אינדיגו",
+    "light-blue": "כחול בהיר",
+    "light-green": "ירוק בהיר",
+    "lime": "ירוק לימון",
+    "pink": "ורוד",
+    "purple": "סגול",
+    "yellow": "צהוב"
   },
   "USER_PROFILES": {
+    "ACTIVE": "פעיל",
     "CANCEL": "ביטול",
+    "CLOSE": "סגירה",
+    "CREATE": "יצירה",
+    "CREATE_NEW_PROFILE": "יצירת פרופיל חדש",
+    "CREATED": "מועד יצירה:",
+    "DELETE_PROFILE": "מחיקת פרופיל",
+    "DIALOG_TITLE": "ניהול פרופילים של משתמשים",
+    "EXISTING_PROFILES": "פרופילים קיימים",
+    "EXPORT_PROFILE": "ייצוא פרופיל",
+    "MANAGE_PROFILES": "ניהול פרופילים...",
     "PROFILE_NAME": "שם הפרופיל",
+    "PROFILE_NAME_PLACEHOLDER": "למשל: עבודה, אישי",
     "RENAME": "שינוי שם",
     "SAVE": "שמירה"
   },
   "V": {
   },
   "WW": {
+    "ADD_MORE": "להוסיף עוד",
+    "TIME_ESTIMATED": "זמן משוער:",
+    "TODAY_REMAINING": "נותרו להיום:",
+    "WITHOUT_BREAK": "בלי הפסקה:"
   }
 }
