@@ -29,6 +29,8 @@ import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { MarkdownModule, MARKED_OPTIONS, SANITIZE } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
+import { IS_TOUCH_PRIMARY } from './app/util/is-mouse-primary';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
 import {
   MATERIAL_ANIMATIONS,
@@ -40,6 +42,7 @@ import {
 import { FormlyConfigModule } from './app/ui/formly-config.module';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
+import { DEFAULT_TODAY_TAG_COLOR } from './app/features/work-context/work-context.const';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { ReminderModule } from './app/features/reminder/reminder.module';
@@ -75,10 +78,13 @@ import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
 import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
 import { Log } from './app/core/log';
 import { OperationWriteFlushService } from './app/op-log/sync/operation-write-flush.service';
+import { PluginOAuthRedirectHandler } from './app/plugins/oauth/plugin-oauth-redirect.handler';
+import { OAuthCallbackHandlerService } from './app/imex/sync/oauth-callback-handler.service';
 import { GlobalConfigService } from './app/features/config/global-config.service';
 import { LocaleDatePipe } from './app/ui/pipes/locale-date.pipe';
 import { DateTimeFormatService } from './app/core/date-time-format/date-time-format.service';
 import { CustomDateAdapter } from './app/core/date-time-format/custom-date-adapter';
+import { unlockAudioContext } from './app/util/audio-context';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -89,6 +95,10 @@ if (environment.production || environment.stage) {
 // Module-level injector for use in Capacitor lifecycle handlers.
 // Set after Angular bootstrap completes.
 let appInjector: Injector | null = null;
+
+// Register one-time user gesture listener to unlock AudioContext.
+// Required on iOS/Android where AudioContext starts suspended.
+unlockAudioContext();
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -111,7 +121,9 @@ bootstrapApplication(AppComponent, {
         },
         sanitize: { provide: SANITIZE, useValue: SecurityContext.HTML },
       }),
-      MaterialCssVarsModule.forRoot(),
+      MaterialCssVarsModule.forRoot({
+        primary: DEFAULT_TODAY_TAG_COLOR,
+      }),
       MatSidenavModule,
       MatBottomSheetModule,
       ReminderModule,
@@ -196,6 +208,10 @@ bootstrapApplication(AppComponent, {
       provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
       useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
     },
+    // Disable autofocus for touch-primary devices to prevent virtual keyboard popup
+    ...(IS_TOUCH_PRIMARY
+      ? [{ provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { autoFocus: false } }]
+      : []),
     provideAnimationsAsync(),
     {
       provide: MATERIAL_ANIMATIONS,
@@ -222,7 +238,7 @@ bootstrapApplication(AppComponent, {
       multi: true,
     },
     // Ensure DataInitService is instantiated at bootstrap.
-    // Its constructor triggers reInit() → hydrateStore() → loadAllData into NgRx.
+    // Its constructor triggers reInit() -> hydrateStore() -> loadAllData into NgRx.
     {
       provide: APP_INITIALIZER,
       useFactory: (_dataInit: DataInitService) => {
@@ -239,6 +255,28 @@ bootstrapApplication(AppComponent, {
         return () => {};
       },
       deps: [EncryptionPasswordDialogOpenerService],
+      multi: true,
+    },
+    // Ensure PluginOAuthRedirectHandler is instantiated at bootstrap.
+    // Its constructor registers platform-specific listeners (postMessage / Electron IPC)
+    // that bridge OAuth redirect callbacks to PluginOAuthService.
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (_handler: PluginOAuthRedirectHandler) => {
+        return () => {};
+      },
+      deps: [PluginOAuthRedirectHandler],
+      multi: true,
+    },
+    // Ensure OAuthCallbackHandlerService is instantiated at bootstrap on native platforms.
+    // Its constructor registers Capacitor's appUrlOpen listener that bridges
+    // both Dropbox and plugin OAuth redirect callbacks.
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (_handler: OAuthCallbackHandlerService) => {
+        return () => {};
+      },
+      deps: [OAuthCallbackHandlerService],
       multi: true,
     },
     // Note: ImmediateUploadService now initializes itself in constructor

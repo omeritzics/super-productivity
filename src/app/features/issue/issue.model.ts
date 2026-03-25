@@ -74,6 +74,29 @@ export const isPluginIssueProvider = (
   return typeof key === 'string' && key.startsWith('plugin:');
 };
 
+const BUILT_IN_KEYS: ReadonlySet<string> = new Set<BuiltInIssueProviderKey>([
+  'JIRA',
+  'GITLAB',
+  'CALDAV',
+  'ICAL',
+  'OPEN_PROJECT',
+  'GITEA',
+  'TRELLO',
+  'REDMINE',
+  'LINEAR',
+  'AZURE_DEVOPS',
+  'NEXTCLOUD_DECK',
+]);
+
+const MIGRATED_KEYS: ReadonlySet<string> = new Set<MigratedIssueProviderKey>([
+  'GITHUB',
+  'CLICKUP',
+]);
+
+export const isValidIssueProviderKey = (key: string): key is IssueProviderKey => {
+  return BUILT_IN_KEYS.has(key) || MIGRATED_KEYS.has(key) || key.startsWith('plugin:');
+};
+
 export type IssueIntegrationCfg =
   | JiraCfg
   | GitlabCfg
@@ -191,6 +214,8 @@ export interface IssueProviderState extends EntityState<IssueProvider> {
 
 // export type IssueProviderState = EntityState<IssueProvider>;
 
+export type IssueProviderPollingMode = 'whenProjectOpen' | 'always';
+
 export interface IssueProviderBase extends BaseIssueProviderCfg {
   id: string;
   isEnabled: boolean;
@@ -202,6 +227,9 @@ export interface IssueProviderBase extends BaseIssueProviderCfg {
   isAutoPoll?: boolean;
   isAutoAddToBacklog?: boolean;
   isIntegratedAddTaskBar?: boolean;
+  pollingMode?: IssueProviderPollingMode;
+  defaultTagIds?: string[];
+  defaultNote?: string | null;
 }
 
 export interface IssueProviderJira extends IssueProviderBase, JiraCfg {

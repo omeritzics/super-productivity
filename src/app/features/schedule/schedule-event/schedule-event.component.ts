@@ -8,6 +8,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { hasLinkHints, RenderLinksPipe } from '../../../ui/pipes/render-links.pipe';
 import { CdkDrag } from '@angular/cdk/drag-drop';
 import { ScheduleEvent, ScheduleFromCalendarEvent } from '../schedule.model';
 import { MatIcon } from '@angular/material/icon';
@@ -31,7 +32,6 @@ import { selectTaskByIdWithSubTaskData } from '../../tasks/store/task.selectors'
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TaskService } from '../../tasks/task.service';
 import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
-import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
 import { IssueService } from '../../issue/issue.service';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
@@ -41,7 +41,7 @@ const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 
 @Component({
   selector: 'schedule-event',
-  imports: [MatIcon, TranslateModule, TaskContextMenuComponent],
+  imports: [MatIcon, TranslateModule, TaskContextMenuComponent, RenderLinksPipe],
   templateUrl: './schedule-event.component.html',
   styleUrl: './schedule-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,7 +53,7 @@ const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
     '[style]': 'style()',
     '[style.--project-color]': 'projectColor()',
     '[style.height]': '_resizeHeight()',
-    '(click)': 'clickHandler()',
+    '(click)': 'clickHandler($event)',
     '(contextmenu)': 'onContextMenu($event)',
   },
   /* eslint-enable @typescript-eslint/naming-convention */
@@ -72,6 +72,10 @@ export class ScheduleEventComponent {
   private _issueService = inject(IssueService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
   private _taskService = inject(TaskService);
+  readonly titleHasLinks = computed(() => {
+    const t = this.title();
+    return !!t && hasLinkHints(t);
+  });
 
   readonly T: typeof T = T;
   readonly isDragPreview = input<boolean>(false);
@@ -257,7 +261,11 @@ export class ScheduleEventComponent {
     return 'SPLIT_CONTINUE';
   });
 
-  async clickHandler(): Promise<void> {
+  async clickHandler(event: MouseEvent): Promise<void> {
+    const target = event.target as HTMLElement | null;
+    if (target?.tagName === 'A' || target?.closest('a')) {
+      return; // Let link clicks propagate without opening the schedule event panel
+    }
     // Prevent opening dialog when resizing or just finished resizing
     if (this._isResizing() || this._justFinishedResizing()) {
       return;
@@ -330,7 +338,6 @@ export class ScheduleEventComponent {
 
     this._matDialog.open(DialogTimeEstimateComponent, {
       data: { task: t, isFocusEstimateOnMousePrimaryDevice: true },
-      autoFocus: !IS_TOUCH_PRIMARY,
     });
   }
 

@@ -7,6 +7,7 @@ import {
   inject,
   input,
   Input,
+  OnDestroy,
   output,
   viewChild,
   ViewEncapsulation,
@@ -99,7 +100,7 @@ import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-co
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated,
 })
-export class TaskContextMenuInnerComponent implements AfterViewInit {
+export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _datePipe = inject(LocaleDatePipe);
   private readonly _taskService = inject(TaskService);
   private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
@@ -179,6 +180,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private _destroy$: Subject<boolean> = new Subject<boolean>();
   private _isTaskDeleteTriggered: boolean = false;
   private _isOpenedFromKeyboard = false;
+  private _touchMenuTimeout: ReturnType<typeof setTimeout> | undefined;
+  private _touchMenuRafId: number | undefined;
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
@@ -198,27 +201,94 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     });
   }
 
-  open(ev: MouseEvent | KeyboardEvent | TouchEvent, isOpenedFromKeyBoard = false): void {
-    ev.preventDefault();
-    ev.stopPropagation();
-    ev.stopImmediatePropagation();
+  ngOnDestroy(): void {
+    this._destroy$.next(true);
+    this._destroy$.complete();
+    if (this._touchMenuTimeout !== undefined) {
+      clearTimeout(this._touchMenuTimeout);
+    }
+    if (this._touchMenuRafId !== undefined) {
+      cancelAnimationFrame(this._touchMenuRafId);
+    }
+  }
 
-    if (ev instanceof MouseEvent || isTouchEventInstance(ev)) {
-      this.contextMenuPosition.x =
-        ('touches' in ev ? ev.touches[0].clientX : ev.clientX) + 10 + 'px';
-      const rawY = ('touches' in ev ? ev.touches[0].clientY : ev.clientY) - 48;
-      const safeAreaTop =
-        parseInt(
-          getComputedStyle(document.documentElement).getPropertyValue(
-            '--safe-area-inset-top',
-          ),
-          10,
-        ) || 0;
-      this.contextMenuPosition.y = Math.max(rawY, safeAreaTop) + 'px';
+  open(ev?: MouseEvent | KeyboardEvent | TouchEvent, isOpenedFromKeyBoard = false): void {
+    if (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      ev.stopImmediatePropagation();
+
+      if (!IS_TOUCH_PRIMARY && (ev instanceof MouseEvent || isTouchEventInstance(ev))) {
+        const clientX = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
+        const clientY = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
+        this.contextMenuPosition.x = clientX + 10 + 'px';
+        const rawY = clientY - 48;
+        const safeAreaTop =
+          parseInt(
+            getComputedStyle(document.documentElement).getPropertyValue(
+              '--safe-area-inset-top',
+            ),
+            10,
+          ) || 0;
+        this.contextMenuPosition.y = Math.max(rawY, safeAreaTop) + 'px';
+      }
     }
 
     this._isOpenedFromKeyboard = isOpenedFromKeyBoard;
     this.contextMenuTrigger()?.openMenu();
+
+    if (IS_TOUCH_PRIMARY) {
+      this._touchMenuTimeout = setTimeout(() => {
+        const boxes = document.querySelectorAll(
+          '.cdk-overlay-connected-position-bounding-box',
+        );
+        const boundingBox = boxes[boxes.length - 1] as HTMLElement | undefined;
+        if (!boundingBox) {
+          return;
+        }
+        // Layout only — CDK backdrop handles scrim + click-to-close
+        // pointer-events: none so taps pass through to the backdrop sibling
+        boundingBox.style.position = 'fixed';
+        boundingBox.style.inset = '0';
+        boundingBox.style.width = '';
+        boundingBox.style.height = '';
+        boundingBox.style.display = 'flex';
+        boundingBox.style.justifyContent = 'center';
+        boundingBox.style.alignItems = 'flex-end';
+        boundingBox.style.pointerEvents = 'none';
+
+        const pane = boundingBox.querySelector('.cdk-overlay-pane') as HTMLElement;
+        if (pane) {
+          pane.style.position = 'static';
+          pane.style.width = '100%';
+          pane.style.display = 'flex';
+          pane.style.justifyContent = 'center';
+          pane.style.pointerEvents = 'none';
+        }
+
+        const menuPanel = boundingBox.querySelector('.mat-mdc-menu-panel') as HTMLElement;
+        if (menuPanel) {
+          // Re-enable pointer events on the menu panel itself
+          menuPanel.style.pointerEvents = 'auto';
+          menuPanel.style.maxWidth = '300px';
+          menuPanel.style.width = '100%';
+          menuPanel.style.borderRadius =
+            'var(--card-border-radius) var(--card-border-radius) 0 0';
+          menuPanel.style.maxHeight = '80vh';
+          menuPanel.style.animation = 'none';
+          menuPanel.style.transform = 'translateY(24px)';
+          menuPanel.style.opacity = '0';
+          void menuPanel.offsetHeight;
+          menuPanel.style.transition =
+            'transform 250ms cubic-bezier(0.2, 0, 0, 1), opacity 150ms ease-out';
+          this._touchMenuRafId = requestAnimationFrame(() => {
+            menuPanel.style.transform = 'translateY(0)';
+            menuPanel.style.opacity = '1';
+          });
+        }
+      });
+      this._highlightSourceTask();
+    }
   }
 
   focusRelatedTaskOrNext(): void {
@@ -331,7 +401,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
           },
         })
         .afterClosed()
-        .pipe(takeUntil(this._destroy$))
         .subscribe(async (isConfirm) => {
           if (isConfirm) {
             await this._performDelete();
@@ -360,10 +429,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     this._matDialog
       .open(DialogTimeEstimateComponent, {
         data: { task: this.task },
-        autoFocus: !IS_TOUCH_PRIMARY,
       })
       .afterClosed()
-      .pipe(takeUntil(this._destroy$))
       .subscribe(() => this.focusRelatedTaskOrNext());
   }
 
@@ -373,7 +440,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
         data: {},
       })
       .afterClosed()
-      .pipe(takeUntil(this._destroy$))
       .subscribe((result) => {
         if (result) {
           this._attachmentService.addAttachment(this.task.id, result);
@@ -616,6 +682,19 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   trackByProjectId(i: number, project: Project): string {
     return project.id;
+  }
+
+  private _highlightSourceTask(): void {
+    const taskEl = document.querySelector(`#t-${this.task.id}`);
+    if (!taskEl) {
+      return;
+    }
+    taskEl.classList.add('context-menu-highlight');
+    this.contextMenu()
+      ?.closed.pipe(takeUntil(this._destroy$), first())
+      .subscribe(() => {
+        taskEl.classList.remove('context-menu-highlight');
+      });
   }
 
   private async _getTaskWithSubtasks(): Promise<TaskWithSubTasks> {

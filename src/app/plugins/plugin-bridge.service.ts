@@ -22,6 +22,8 @@ import {
   BatchTaskCreate,
   BatchUpdateRequest,
   BatchUpdateResult,
+  OAuthFlowConfig,
+  OAuthTokenResult,
   PluginManifest,
   SnackCfg,
 } from '@super-productivity/plugin-api';
@@ -35,7 +37,8 @@ import { WorkContextService } from '../features/work-context/work-context.servic
 import { ProjectService } from '../features/project/project.service';
 import { TagService } from '../features/tag/tag.service';
 import typia from 'typia';
-import { first, take, map } from 'rxjs/operators';
+import { first, map, take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { selectTaskByIdWithSubTaskData } from '../features/tasks/store/task.selectors';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
 import { PluginConfigService } from './plugin-config.service';
@@ -58,6 +61,7 @@ import { GlobalThemeService } from '../core/theme/global-theme.service';
 import { IssueSyncAdapterRegistryService } from '../features/issue/two-way-sync/issue-sync-adapter-registry.service';
 import { PluginHttpService } from './issue-provider/plugin-http.service';
 import { createPluginSyncAdapter } from './issue-provider/plugin-sync-adapter.service';
+import { PluginOAuthBridgeService } from './oauth/plugin-oauth-bridge.service';
 import { ISSUE_PROVIDER_TYPES } from '../features/issue/issue.const';
 
 // New imports for simple counters
@@ -68,10 +72,10 @@ import {
 } from '../features/simple-counter/simple-counter.model';
 import { EMPTY_SIMPLE_COUNTER } from '../features/simple-counter/simple-counter.const';
 import {
-  upsertSimpleCounter,
-  updateSimpleCounter,
   deleteSimpleCounter,
   toggleSimpleCounterCounter,
+  updateSimpleCounter,
+  upsertSimpleCounter,
 } from '../features/simple-counter/store/simple-counter.actions';
 import { getDbDateStr } from '../util/get-db-date-str';
 
@@ -107,6 +111,7 @@ export class PluginBridgeService implements OnDestroy {
   private _globalThemeService = inject(GlobalThemeService);
   private _syncAdapterRegistry = inject(IssueSyncAdapterRegistryService);
   private _pluginHttpService = inject(PluginHttpService);
+  private _pluginOAuthBridge = inject(PluginOAuthBridgeService);
 
   // Track header buttons registered by plugins
   private readonly _headerButtons = signal<PluginHeaderBtnCfg[]>([]);
@@ -123,6 +128,9 @@ export class PluginBridgeService implements OnDestroy {
   private readonly _sidePanelButtons = signal<PluginSidePanelBtnCfg[]>([]);
   public readonly sidePanelButtons = this._sidePanelButtons.asReadonly();
 
+  // Track config handlers registered by plugins (for settings button on plugin card)
+  private readonly _configHandlers = new Map<string, () => void>();
+
   constructor() {
     // Initialize window focus tracking
     this._initWindowFocusTracking();
@@ -138,7 +146,7 @@ export class PluginBridgeService implements OnDestroy {
   ): {
     persistDataSynced: (dataStr: string) => Promise<void>;
     loadPersistedData: () => Promise<string | null>;
-    getConfig: () => Promise<any>;
+    getConfig: () => Promise<unknown>;
     downloadFile: (filename: string, data: string) => Promise<void>;
     registerHeaderButton: (cfg: PluginHeaderBtnCfg) => void;
     registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) => void;
@@ -164,8 +172,12 @@ export class PluginBridgeService implements OnDestroy {
     deleteSimpleCounter: (id: string) => Promise<void>;
     setSimpleCounterToday: (id: string, value: number) => Promise<void>;
     setSimpleCounterDate: (id: string, date: string, value: number) => Promise<void>;
+    registerConfigHandler: (handler: () => void) => void;
     registerIssueProvider: (definition: IssueProviderPluginDefinition) => void;
     unregisterIssueProvider: () => void;
+    startOAuthFlow: (config: OAuthFlowConfig) => Promise<OAuthTokenResult>;
+    getOAuthToken: () => Promise<string | null>;
+    clearOAuthToken: () => Promise<void>;
     log: ReturnType<typeof Log.withContext>;
   } {
     return {
@@ -184,6 +196,8 @@ export class PluginBridgeService implements OnDestroy {
       registerSidePanelButton: (cfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>) =>
         this._registerSidePanelButton(pluginId, cfg),
       registerShortcut: (cfg: PluginShortcutCfg) => this._registerShortcut(pluginId, cfg),
+      registerConfigHandler: (handler: () => void) =>
+        this._configHandlers.set(pluginId, handler),
 
       // Navigation
       showIndexHtmlAsView: () => this._showIndexHtmlAsView(pluginId),
@@ -235,6 +249,14 @@ export class PluginBridgeService implements OnDestroy {
         }
       },
 
+      // OAuth
+      startOAuthFlow: (config: OAuthFlowConfig): Promise<OAuthTokenResult> =>
+        this._pluginOAuthBridge.startOAuthFlow(pluginId, config),
+      getOAuthToken: (): Promise<string | null> =>
+        this._pluginOAuthBridge.getOAuthToken(pluginId),
+      clearOAuthToken: (): Promise<void> =>
+        this._pluginOAuthBridge.clearOAuthTokens(pluginId),
+
       // Logging
       log: Log.withContext(`${pluginId}`),
     };
@@ -273,6 +295,7 @@ export class PluginBridgeService implements OnDestroy {
       throw new Error(`Plugin cannot register under built-in key "${customKey}"`);
     }
     const name = manifest?.name ?? pluginId;
+    const humanReadableName = issueProviderCfg?.humanReadableName ?? name;
     const customIconName = `plugin-${pluginId}-icon`;
     const icon = this._globalThemeService.hasPluginIcon(customIconName)
       ? customIconName
@@ -283,15 +306,18 @@ export class PluginBridgeService implements OnDestroy {
       plural: 'Issues',
     };
 
-    this._pluginIssueProviderRegistry.register(
+    this._pluginIssueProviderRegistry.register({
       pluginId,
       definition,
       name,
+      humanReadableName,
       icon,
       pollIntervalMs,
       issueStrings,
-      customKey,
-    );
+      issueProviderKey: customKey,
+      useAgendaView: issueProviderCfg?.useAgendaView,
+      defaultAutoAddToBacklog: issueProviderCfg?.defaultAutoAddToBacklog,
+    });
 
     const registeredKey = this._pluginIssueProviderRegistry.getRegisteredKey(pluginId);
     if (!registeredKey) {
@@ -314,6 +340,21 @@ export class PluginBridgeService implements OnDestroy {
     PluginLog.log(
       `Plugin ${pluginId} registered issue provider under '${registeredKey}'`,
     );
+  }
+
+  async startOAuthFlow(
+    pluginId: string,
+    config: OAuthFlowConfig,
+  ): Promise<OAuthTokenResult> {
+    return this._pluginOAuthBridge.startOAuthFlow(pluginId, config);
+  }
+
+  async clearOAuthTokens(pluginId: string): Promise<void> {
+    return this._pluginOAuthBridge.clearOAuthTokens(pluginId);
+  }
+
+  async restoreAndCheckOAuthTokens(pluginId: string): Promise<boolean> {
+    return this._pluginOAuthBridge.restoreAndCheckOAuthTokens(pluginId);
   }
 
   private async _downloadFile(filename: string, data: string): Promise<void> {
@@ -367,6 +408,7 @@ export class PluginBridgeService implements OnDestroy {
           autoFocus: true,
           restoreFocus: true,
           disableClose: false,
+          closeOnNavigation: false,
         });
 
         dialogRef.afterClosed().subscribe((result) => {
@@ -442,15 +484,52 @@ export class PluginBridgeService implements OnDestroy {
     typia.assert<string>(taskId);
     typia.assert<Partial<TaskCopy>>(updates);
 
-    // Validate that referenced project, tags, and parent task exist if they are being updated
+    // Validate that referenced project, tags and parent task exist if they are being updated
     await this._validateTaskReferences(
       updates.projectId,
       updates.tagIds,
       updates.parentId,
     );
 
-    // Update the task using TaskService (TaskCopy is compatible with Task)
-    this._taskService.update(taskId, updates);
+    const { projectId, ...otherUpdates } = updates;
+
+    if (projectId !== undefined) {
+      const taskWithSubTasks = await firstValueFrom(
+        this._store.select((state) =>
+          selectTaskByIdWithSubTaskData(state, { id: taskId }),
+        ),
+      );
+
+      if (!taskWithSubTasks?.id || taskWithSubTasks.id !== taskId) {
+        throw new Error(
+          this._translateService.instant(T.PLUGINS.TASK_NOT_FOUND, { taskId }),
+        );
+      }
+
+      if (taskWithSubTasks.parentId) {
+        throw new Error(
+          'Subtasks cannot be moved directly. Move the parent task instead.',
+        );
+      }
+
+      if (taskWithSubTasks.projectId === projectId) {
+        PluginLog.log('PluginBridge: Task already in target project', {
+          taskId,
+          projectId,
+        });
+      } else {
+        this._taskService.moveToProject(taskWithSubTasks, projectId);
+
+        PluginLog.log('PluginBridge: Task moved to project successfully', {
+          taskId,
+          projectId,
+        });
+      }
+    }
+
+    if (Object.keys(otherUpdates).length > 0) {
+      this._taskService.update(taskId, otherUpdates);
+    }
 
     PluginLog.log('PluginBridge: Task updated successfully', { taskId, updates });
   }
@@ -826,7 +905,7 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Internal method to get plugin configuration
    */
-  private async _getConfig(pluginId: string): Promise<any> {
+  private async _getConfig(pluginId: string): Promise<unknown> {
     try {
       return await this._pluginConfigService.getPluginConfig(pluginId);
     } catch (error) {
@@ -875,6 +954,7 @@ export class PluginBridgeService implements OnDestroy {
     this._removePluginMenuEntries(pluginId);
     this._removePluginSidePanelButtons(pluginId);
     this.unregisterPluginShortcuts(pluginId);
+    this._configHandlers.delete(pluginId);
 
     // Clean up window focus handler
     this._windowFocusHandlers.delete(pluginId);
@@ -976,6 +1056,14 @@ export class PluginBridgeService implements OnDestroy {
     this._headerButtons.set(filteredButtons);
 
     PluginLog.log('PluginBridge: Header buttons removed for plugin', { pluginId });
+  }
+
+  hasConfigHandler(pluginId: string): boolean {
+    return this._configHandlers.has(pluginId);
+  }
+
+  invokeConfigHandler(pluginId: string): void {
+    this._configHandlers.get(pluginId)?.();
   }
 
   /**

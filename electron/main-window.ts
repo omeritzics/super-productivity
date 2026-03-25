@@ -19,6 +19,7 @@ import { error, log } from 'electron-log/main';
 import { IS_MAC } from './common.const';
 import {
   destroyOverlayWindow,
+  getIsOverlayAlwaysShow,
   hideOverlayWindow,
   showOverlayWindow,
 } from './overlay-indicator/overlay-indicator';
@@ -120,7 +121,9 @@ export const createWindow = async ({
     webPreferences: {
       scrollBounce: true,
       backgroundThrottling: false,
-      webSecurity: false,
+      // CORS is handled at the session level via onBeforeSendHeaders (strips Origin)
+      // and onHeadersReceived (injects Access-Control-Allow-* headers)
+      webSecurity: true,
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: false,
       // make remote module work with those two settings
@@ -175,6 +178,18 @@ export const createWindow = async ({
     callback({
       responseHeaders,
     });
+  });
+
+  // Deny unnecessary permissions (webcam, microphone, geolocation, etc.)
+  // The app only needs notifications for desktop reminders
+  const allowedPermissions = ['notifications'];
+  mainWin.webContents.session.setPermissionRequestHandler(
+    (_webContents, permission, callback) => {
+      callback(allowedPermissions.includes(permission));
+    },
+  );
+  mainWin.webContents.session.setPermissionCheckHandler((_webContents, permission) => {
+    return allowedPermissions.includes(permission);
   });
 
   mainWindowState.manage(mainWin);
@@ -331,15 +346,21 @@ function initWinEventListeners(app: Electron.App): void {
 
   // Handle restore and show events to hide overlay
   mainWin.on('restore', () => {
-    hideOverlayWindow();
+    if (!getIsOverlayAlwaysShow()) {
+      hideOverlayWindow();
+    }
   });
 
   mainWin.on('show', () => {
-    hideOverlayWindow();
+    if (!getIsOverlayAlwaysShow()) {
+      hideOverlayWindow();
+    }
   });
 
   mainWin.on('focus', () => {
-    hideOverlayWindow();
+    if (mainWin.isVisible() && !mainWin.isMinimized() && !getIsOverlayAlwaysShow()) {
+      hideOverlayWindow();
+    }
   });
 
   // Handle hide event to show overlay

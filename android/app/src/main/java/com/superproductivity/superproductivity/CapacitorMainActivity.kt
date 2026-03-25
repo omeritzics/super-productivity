@@ -18,7 +18,9 @@ import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
 import com.superproductivity.superproductivity.plugins.NavigationBarPlugin
 import com.superproductivity.superproductivity.plugins.SafBridgePlugin
+import com.superproductivity.superproductivity.service.BackgroundSyncCredentialStore
 import com.superproductivity.superproductivity.service.FocusModeForegroundService
+import com.superproductivity.superproductivity.service.SyncReminderScheduler
 import com.superproductivity.superproductivity.service.TrackingForegroundService
 import com.superproductivity.superproductivity.util.printWebViewVersion
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
@@ -81,9 +83,11 @@ class CapacitorMainActivity : BridgeActivity() {
 
         // DEBUG ONLY
         if (BuildConfig.DEBUG) {
-            val debugToast = Toast.makeText(this, "DEBUG", Toast.LENGTH_SHORT)
-            debugToast.show()
-            Handler(Looper.getMainLooper()).postDelayed({ debugToast.cancel() }, 100)
+            Handler(Looper.getMainLooper()).postDelayed({
+                val debugToast = Toast.makeText(this, "DEBUG", Toast.LENGTH_SHORT)
+                debugToast.show()
+                Handler(Looper.getMainLooper()).postDelayed({ debugToast.cancel() }, 100)
+            }, 10_000)
             WebView.setWebContentsDebuggingEnabled(true)
         }
 
@@ -157,6 +161,11 @@ class CapacitorMainActivity : BridgeActivity() {
         if (savedInstanceState == null) {
             startupOverlayManager = StartupOverlayManager(this)
             startupOverlayManager?.show()
+        }
+
+        // Schedule background sync worker if credentials are configured
+        if (BackgroundSyncCredentialStore.get(this) != null) {
+            SyncReminderScheduler.ensureScheduled(this)
         }
 
         // Handle initial intent (cold start)

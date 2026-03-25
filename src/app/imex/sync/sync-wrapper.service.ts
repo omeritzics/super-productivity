@@ -433,8 +433,14 @@ export class SyncWrapperService {
       ) {
         this._providerManager.setSyncStatus('ERROR');
         this._superSyncStatusService.clearScope();
-        // Clear stale auth credentials so isReady() returns false and re-auth dialog opens
-        if (providerId) {
+        // Clear stale auth credentials so isReady() returns false and re-auth dialog opens.
+        // Exception: SuperSync AuthFailSPError — the server rejection may be transient
+        // (e.g. an infrastructure error returning 401 instead of 500). The snackbar shows
+        // a "Configure" button so users can re-auth on genuine failures. Other providers
+        // (Dropbox, WebDAV) must clear immediately so their OAuth/re-auth flows work.
+        const skipClear =
+          error instanceof AuthFailSPError && providerId === SyncProviderId.SuperSync;
+        if (providerId && !skipClear) {
           try {
             await this._providerManager.clearAuthCredentials(providerId);
           } catch (clearError) {
@@ -713,7 +719,6 @@ export class SyncWrapperService {
     const dialogRef = this._matDialog.open(DialogSyncErrorComponent, {
       data,
       disableClose: true,
-      autoFocus: false,
     });
 
     firstValueFrom(dialogRef.afterClosed())
@@ -776,7 +781,6 @@ export class SyncWrapperService {
     this._passwordDialog = this._matDialog.open(DialogEnterEncryptionPasswordComponent, {
       width: '450px',
       disableClose: true,
-      autoFocus: false,
     });
 
     firstValueFrom(this._passwordDialog.afterClosed())
@@ -828,7 +832,6 @@ export class SyncWrapperService {
     // Open dialog for password correction
     this._passwordDialog = this._matDialog.open(DialogHandleDecryptErrorComponent, {
       disableClose: true,
-      autoFocus: false,
     });
 
     firstValueFrom(this._passwordDialog.afterClosed())
@@ -1107,7 +1110,6 @@ export class SyncWrapperService {
     }
     this.lastConflictDialog = this._matDialog.open(DialogSyncConflictComponent, {
       restoreFocus: true,
-      autoFocus: false,
       disableClose: true,
       data: conflictData,
     });
