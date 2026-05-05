@@ -2938,7 +2938,11 @@ describe('ConflictResolutionService', () => {
       expect(result[0].actionType).toBe('test');
     });
 
-    it('should fall back to changing only actionType when base entity cannot be extracted', () => {
+    it('should return remote op unchanged when base entity cannot be extracted', () => {
+      // Rewriting actionType to LWW Update with an unmerged NgRx UPDATE payload
+      // would no-op at the consumer (lwwUpdateMetaReducer bails when entityData
+      // has no top-level id). The fallback now leaves the op alone instead of
+      // pretending to convert it.
       const conflict = createConflict(
         'task-1',
         [
@@ -2959,7 +2963,7 @@ describe('ConflictResolutionService', () => {
 
       const result = (service as any)._convertToLWWUpdatesIfNeeded(conflict);
 
-      expect(result[0].actionType).toBe('[TASK] LWW Update');
+      expect(result[0].actionType).toBe('test');
       expect(result[0].payload).toEqual({
         task: { id: 'task-1', changes: { title: 'Updated' } },
       });
@@ -3022,8 +3026,8 @@ describe('ConflictResolutionService', () => {
       const result = (service as any)._convertToLWWUpdatesIfNeeded(conflict);
 
       expect(result.length).toBe(1);
-      expect(result[0].actionType).toBe('[TASK] LWW Update');
-      // Fallback: original payload preserved (no merged entity)
+      // Fallback returns the remote op unchanged — original actionType + payload preserved.
+      expect(result[0].actionType).toBe('test');
       expect(result[0].payload).toEqual({
         task: { id: 'task-1', changes: { title: 'Updated' } },
       });
@@ -3050,8 +3054,8 @@ describe('ConflictResolutionService', () => {
 
       const result = (service as any)._convertToLWWUpdatesIfNeeded(conflict);
 
-      expect(result[0].actionType).toBe('[TASK] LWW Update');
-      // Original remote payload kept as-is when fallback triggers
+      // Fallback returns the remote op unchanged — original actionType + payload preserved.
+      expect(result[0].actionType).toBe('test');
       expect(result[0].payload).toEqual({
         task: { id: 'task-1', changes: { notes: 'New notes' } },
       });
@@ -3450,6 +3454,68 @@ describe('ConflictResolutionService', () => {
         );
         expect(result).toBe(VectorClockComparison.CONCURRENT);
       });
+    });
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // BUG CONFIRMATION TEST (Issue #6571)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  describe('Bug #6571: LWW apply failure does not throw', () => {
+    const now = Date.now();
+
+    const createOpForBug = (
+      id: string,
+      clientId: string,
+      timestamp: number,
+    ): Operation => ({
+      id,
+      clientId,
+      actionType: 'test' as ActionType,
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'task-1',
+      payload: { source: clientId },
+      vectorClock: { [clientId]: 1 },
+      timestamp,
+      schemaVersion: 1,
+    });
+
+    beforeEach(() => {
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.callFake(() => Promise.resolve(1));
+      mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => Promise.resolve(1));
+      mockOpLogStore.markApplied.and.resolveTo(undefined);
+      mockOpLogStore.markRejected.and.resolveTo(undefined);
+      mockOpLogStore.markFailed.and.resolveTo(undefined);
+    });
+
+    it('should throw when applyOperations has a failedOp', async () => {
+      const localOp = createOpForBug('local-1', 'client-a', now - 1000);
+      const remoteOp = createOpForBug('remote-1', 'client-b', now);
+
+      const conflicts: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [localOp],
+          remoteOps: [remoteOp],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      mockOperationApplier.applyOperations.and.resolveTo({
+        appliedOps: [],
+        failedOp: { op: remoteOp, error: new Error('Apply failed for task-1') },
+      });
+
+      // FIXED: Should throw on apply failure (parity with applyNonConflictingOps)
+      await expectAsync(service.autoResolveConflictsLWW(conflicts)).toBeRejectedWithError(
+        'Apply failed for task-1',
+      );
+
+      expect(mockOpLogStore.markFailed).toHaveBeenCalled();
+      expect(mockSnackService.open).toHaveBeenCalled();
     });
   });
 });

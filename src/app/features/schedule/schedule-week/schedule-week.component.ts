@@ -23,8 +23,7 @@ import { ScheduleEventComponent } from '../schedule-event/schedule-event.compone
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { T } from '../../../t.const';
-import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
-import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
+import { dragDelayForTouch, isTouchActive } from '../../../util/input-intent';
 import { MatTooltip } from '@angular/material/tooltip';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
@@ -83,8 +82,8 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly isShiftNoScheduleMode = this._service.isShiftMode;
 
   FH = FH;
-  IS_TOUCH_PRIMARY = IS_TOUCH_PRIMARY;
-  DRAG_DELAY_FOR_TOUCH = DRAG_DELAY_FOR_TOUCH;
+  protected readonly isTouchActive = isTouchActive;
+  dragDelayForTouch = dragDelayForTouch;
   SVEType: typeof SVEType = SVEType;
   T: typeof T = T;
   protected readonly isDraggableSE = isDraggableSE;
@@ -115,6 +114,13 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
 
   safeEvents = computed(() => this.events() || []);
   safeBeyondBudget = computed(() => this.beyondBudget() || []);
+
+  // Split projections (RepeatProjectionSplit, SplitTaskContinued, …) share the
+  // task/repeat-cfg id across segments. Combine day + start hour so each visual
+  // segment has a unique @for track key and Angular can reconcile them.
+  trackEventKey(ev: ScheduleEvent): string {
+    return `${ev.id}_${ev.plannedForDay ?? ''}_${ev.startHours}`;
+  }
 
   newTaskPlaceholder = signal<{
     style: string;
@@ -268,7 +274,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
       event: ev,
       gridElement,
       days: this.daysToShow() || [],
-      isTouchPrimary: IS_TOUCH_PRIMARY,
+      isTouchPrimary: isTouchActive(),
     });
 
     this.newTaskPlaceholder.set(placeholder);

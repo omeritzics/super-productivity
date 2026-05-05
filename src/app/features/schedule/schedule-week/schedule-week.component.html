@@ -93,7 +93,7 @@
   }
 
   <!-- Events -->
-  @for (ev of safeEvents(); track ev.id) {
+  @for (ev of safeEvents(); track trackEventKey(ev)) {
     @if (isDraggableSE(ev)) {
       <schedule-event
         class="draggable"
@@ -101,7 +101,7 @@
         (cdkDragMoved)="dragMoved($event)"
         (cdkDragStarted)="dragStarted($event)"
         (cdkDragReleased)="dragReleased($event)"
-        [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 75 : 0"
+        [cdkDragStartDelay]="isTouchActive() ? 75 : 0"
         [event]="ev"
       ></schedule-event>
     } @else {
@@ -127,7 +127,7 @@
           <mat-icon>hourglass_disabled</mat-icon>
           {{ beyondBudgetDay.length }}
         </div>
-        @for (ev of beyondBudgetDay; track ev.id) {
+        @for (ev of beyondBudgetDay; track trackEventKey(ev)) {
           @if (isDraggableSE(ev)) {
             <schedule-event
               [event]="ev"
@@ -136,7 +136,7 @@
               (cdkDragMoved)="dragMoved($event)"
               (cdkDragStarted)="dragStarted($event)"
               (cdkDragReleased)="dragReleased($event)"
-              [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
+              [cdkDragStartDelay]="dragDelayForTouch()"
             ></schedule-event>
           } @else {
             <schedule-event

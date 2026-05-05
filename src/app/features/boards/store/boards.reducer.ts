@@ -3,6 +3,18 @@ import { BoardsActions } from './boards.actions';
 import { BoardCfg } from '../boards.model';
 import { DEFAULT_BOARDS } from '../boards.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { nanoid } from 'nanoid';
+import { sanitizePanelCfg } from '../boards.util';
+
+const sanitizeBoard = (board: BoardCfg): BoardCfg => ({
+  ...board,
+  panels: (board.panels || []).map(sanitizePanelCfg),
+});
+
+const sanitizeBoardsState = (state: BoardsState): BoardsState => ({
+  ...state,
+  boardCfgs: state.boardCfgs.map(sanitizeBoard),
+});
 
 export const BOARDS_FEATURE_NAME = 'boards';
 
@@ -14,24 +26,57 @@ export const initialBoardsState: BoardsState = {
   boardCfgs: DEFAULT_BOARDS,
 };
 
+/**
+ * Fix for #6983: Replace duplicate panel IDs across boards with unique ones.
+ * Boards duplicated before the fix in 99d9fac reused panel IDs from the original,
+ * causing updatePanelCfgTaskIds to always match the first board's panel.
+ */
+export const deduplicatePanelIds = (boardsState: BoardsState): BoardsState => {
+  const seenIds = new Set<string>();
+  let changed = false;
+
+  const boardCfgs = boardsState.boardCfgs.map((board) => {
+    let boardChanged = false;
+    const panels = board.panels.map((panel) => {
+      if (seenIds.has(panel.id)) {
+        changed = true;
+        boardChanged = true;
+        return { ...panel, id: nanoid() };
+      }
+      seenIds.add(panel.id);
+      return panel;
+    });
+    return boardChanged ? { ...board, panels } : board;
+  });
+
+  return changed ? { ...boardsState, boardCfgs } : boardsState;
+};
+
 export const boardsReducer = createReducer(
   initialBoardsState,
   // META ACTIONS
   // ------------
-  on(loadAllData, (state, { appDataComplete }) => appDataComplete.boards),
+  on(loadAllData, (state, { appDataComplete }) =>
+    appDataComplete.boards
+      ? sanitizeBoardsState(deduplicatePanelIds(appDataComplete.boards))
+      : state,
+  ),
 
   on(BoardsActions.addBoard, (state, { board }) => {
     return {
       ...state,
-      boardCfgs: [...state.boardCfgs, board],
+      boardCfgs: [...state.boardCfgs, sanitizeBoard(board)],
     };
   }),
 
   on(BoardsActions.updateBoard, (state, { id, updates }) => {
+    const sanitizedUpdates = updates.panels
+      ? { ...updates, panels: updates.panels.map(sanitizePanelCfg) }
+      : updates;
     return {
       ...state,
       boardCfgs: state.boardCfgs.map((cfg) =>
-        cfg.id === id ? { ...cfg, ...updates } : cfg,
+        cfg.id === id ? { ...cfg, ...sanitizedUpdates } : cfg,
       ),
     };
   }),
@@ -75,6 +120,15 @@ export const boardsReducer = createReducer(
   //
   //   return state;
   // }),
+
+  on(BoardsActions.sortBoards, (state, { ids }) => {
+    const byId = new Map(state.boardCfgs.map((b) => [b.id, b]));
+    const ordered = ids.map((id) => byId.get(id)).filter((b): b is BoardCfg => !!b);
+    const seen = new Set(ids);
+    // Preserve boards missing from `ids` (e.g. stale dispatch from another client).
+    const tail = state.boardCfgs.filter((b) => !seen.has(b.id));
+    return { ...state, boardCfgs: [...ordered, ...tail] };
+  }),
 
   on(BoardsActions.updatePanelCfgTaskIds, (state, { panelId, taskIds }) => {
     let panelCfgToUpdate;

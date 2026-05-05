@@ -14,12 +14,22 @@
     }
     @if (!note.imgUrl) {
       <div class="content">
-        <div
-          (click)="editFullscreen($event)"
-          markdown
-          [data]="isLongNote ? resolvedShortenedContent() : resolvedContent()"
-          class="markdown-preview markdown"
-        ></div>
+        @if (note.isLock) {
+          <div
+            (click)="editFullscreen($event)"
+            class="markdown-preview"
+            [innerHTML]="
+              (isLongNote ? resolvedShortenedContent() : resolvedContent()) | renderLinks
+            "
+          ></div>
+        } @else {
+          <div
+            (click)="editFullscreen($event)"
+            markdown
+            [data]="isLongNote ? resolvedShortenedContent() : resolvedContent()"
+            class="markdown-preview markdown"
+          ></div>
+        }
       </div>
     }
     <div
@@ -108,6 +118,11 @@
             (click)="moveNoteToProject(project.id)"
             mat-menu-item
           >
+            <mat-icon
+              [style.color]="project.theme.primary"
+              class="tag-ico"
+              >{{ project.icon || 'list' }}</mat-icon
+            >
             {{ project.title }}
           </button>
         }

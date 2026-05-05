@@ -18,13 +18,14 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { TaskRepeatCfg, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
+import { TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
 import { Update } from '@ngrx/entity';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TaskArchiveService } from '../../archive/task-archive.service';
 import { DateService } from '../../../core/date/date.service';
@@ -42,6 +43,8 @@ import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creat
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { devError } from '../../../util/dev-error';
 import { getFirstRepeatOccurrence } from './get-first-repeat-occurrence.util';
+import { getNextRepeatOccurrence } from './get-next-repeat-occurrence.util';
+import { clampPastTimedOccurrence } from './clamp-past-timed-occurrence.util';
 
 const SCHEDULE_AFFECTING_FIELDS: (keyof TaskRepeatCfgCopy)[] = [
   'startDate',
@@ -69,7 +72,10 @@ export class TaskRepeatCfgEffects {
   addRepeatCfgToTaskUpdateTask$ = createEffect(() =>
     this._localActions$.pipe(
       ofType(addTaskRepeatCfgToTask),
-      filter(({ startTime, remindAt }) => !!startTime && !!remindAt),
+      filter(
+        ({ startTime, remindAt }) =>
+          !!startTime && !!remindAt && isValidSplitTime(startTime),
+      ),
       concatMap(({ taskId, startTime, remindAt, taskRepeatCfg }) =>
         this._taskService.getByIdOnce$(taskId).pipe(
           map((task) => {
@@ -77,11 +83,9 @@ export class TaskRepeatCfgEffects {
               devError(`Task with id ${taskId} not found`);
               return null; // Return null instead of EMPTY
             }
-            // Calculate the correct target day based on the repeat pattern (fixes #5594)
-            // Use getFirstRepeatOccurrence which handles future start dates correctly
-            const calculatedTargetDate = getFirstRepeatOccurrence(
-              taskRepeatCfg as TaskRepeatCfg,
-              new Date(),
+            const calculatedTargetDate = clampPastTimedOccurrence(
+              getFirstRepeatOccurrence(taskRepeatCfg),
+              taskRepeatCfg,
             );
 
             // Use calculated date if available, otherwise fall back to existing logic
@@ -143,7 +147,7 @@ export class TaskRepeatCfgEffects {
                 task: taskWithoutSubs,
                 taskRepeatCfg,
                 subTaskTemplates: [],
-                isTimedTask: !!(startTime && remindAt),
+                isTimedTask: !!(startTime && remindAt && isValidSplitTime(startTime)),
               };
             }
 
@@ -153,15 +157,15 @@ export class TaskRepeatCfgEffects {
               task: taskWithoutSubs,
               taskRepeatCfg,
               subTaskTemplates,
-              isTimedTask: !!(startTime && remindAt),
+              isTimedTask: !!(startTime && remindAt && isValidSplitTime(startTime)),
             };
           }),
         );
       }),
       map(({ task, taskRepeatCfg, subTaskTemplates, isTimedTask }) => {
-        const firstOccurrence = getFirstRepeatOccurrence(
-          taskRepeatCfg as TaskRepeatCfg,
-          new Date(),
+        const firstOccurrence = clampPastTimedOccurrence(
+          getFirstRepeatOccurrence(taskRepeatCfg),
+          taskRepeatCfg,
         );
         const firstOccurrenceStr = firstOccurrence
           ? this._dateService.todayStr(firstOccurrence)
@@ -178,12 +182,13 @@ export class TaskRepeatCfgEffects {
         });
 
         if (!isFirstOccurrenceToday_ && firstOccurrence) {
-          // FUTURE FIRST OCCURRENCE:
+          // NON-TODAY FIRST OCCURRENCE (past or future):
           // Update created to match what the repeat processor would set (noon on
           // first occurrence day). This prevents duplicate creation via the
           // created-date check in _getActionsForTaskRepeatCfg (service.ts:217-219).
-          // Also set dueDay so the task is immediately scheduled for the start date
-          // and no longer appears in today's view (#6856).
+          // Also align dueDay with the first occurrence: for future occurrences
+          // this removes the task from today's view (#6856); for past occurrences
+          // this is a no-op when dueDay already matches (#7344 preservation).
           this._taskService.update(task.id, {
             created: firstOccurrence.getTime(),
             dueDay: firstOccurrenceStr,
@@ -262,7 +267,24 @@ export class TaskRepeatCfgEffects {
                   a.created > b.created ? a : b,
                 );
 
-                const firstOccurrence = getFirstRepeatOccurrence(fullCfg, new Date());
+                // If the user moved startDate earlier than the existing
+                // lastTaskCreationDay, the anchor is stale — re-anchor on
+                // the new startDate (#7423). Skip for repeatFromCompletionDate
+                // configs: there startDate is decoupled from scheduling
+                // (getEffectiveRepeatStartDate uses lastTaskCreationDay), so
+                // editing startDate must not clear completion history.
+                const changes = taskRepeatCfg.changes as Partial<TaskRepeatCfgCopy>;
+                const lastCreationDay = getEffectiveLastTaskCreationDay(fullCfg);
+                const isStartDateMovedEarlier =
+                  'startDate' in changes &&
+                  !fullCfg.repeatFromCompletionDate &&
+                  !!fullCfg.startDate &&
+                  !!lastCreationDay &&
+                  fullCfg.startDate < lastCreationDay;
+
+                const firstOccurrence = isStartDateMovedEarlier
+                  ? getFirstRepeatOccurrence(fullCfg)
+                  : getNextRepeatOccurrence(fullCfg, new Date());
                 const firstOccurrenceStr = firstOccurrence
                   ? this._dateService.todayStr(firstOccurrence)
                   : this._dateService.todayStr();
@@ -273,7 +295,11 @@ export class TaskRepeatCfgEffects {
                   lastTaskCreation: firstOccurrence?.getTime() || Date.now(),
                 });
 
-                const isTimedTask = !!(fullCfg.startTime && fullCfg.remindAt);
+                const isTimedTask = !!(
+                  fullCfg.startTime &&
+                  fullCfg.remindAt &&
+                  isValidSplitTime(fullCfg.startTime)
+                );
                 const isFirstOccurrenceToday_ = firstOccurrence
                   ? this._dateService.isToday(firstOccurrence)
                   : true;
@@ -646,6 +672,7 @@ export class TaskRepeatCfgEffects {
       (changes.startTime || changes.remindAt) &&
       completeCfg.remindAt &&
       completeCfg.startTime &&
+      isValidSplitTime(completeCfg.startTime) &&
       this._dateService.isToday(task.created)
     ) {
       const dateTime = getDateTimeFromClockString(

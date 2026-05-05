@@ -92,6 +92,16 @@
           android:scheme="com.super-productivity.app"
           android:host="plugin-oauth-callback" />
       </intent-filter>
+
+      <!-- OAuth callback for plugin auth using Android package name scheme -->
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data
+          android:scheme="com.superproductivity.superproductivity"
+          android:pathPrefix="/plugin-oauth-callback" />
+      </intent-filter>
     </activity>
 
     <activity
@@ -136,6 +146,9 @@
       android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />
+      </intent-filter>
+      <intent-filter>
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
       </intent-filter>
     </receiver>
 

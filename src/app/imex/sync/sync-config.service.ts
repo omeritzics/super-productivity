@@ -3,7 +3,7 @@ import { SyncProviderManager } from '../../op-log/sync-providers/provider-manage
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { combineLatest, from, Observable, of } from 'rxjs';
 import { SyncConfig } from '../../features/config/global-config.model';
-import { switchMap, tap } from 'rxjs/operators';
+import { shareReplay, switchMap, tap } from 'rxjs/operators';
 import {
   CurrentProviderPrivateCfg,
   PrivateCfgByProviderId,
@@ -21,6 +21,7 @@ const PROP_MAP_TO_FORM: Record<SyncProviderId, keyof SyncConfig | null> = {
   [SyncProviderId.LocalFile]: 'localFileSync',
   [SyncProviderId.WebDAV]: 'webDav',
   [SyncProviderId.SuperSync]: 'superSync',
+  [SyncProviderId.Nextcloud]: 'nextcloud',
   [SyncProviderId.Dropbox]: null,
 };
 
@@ -74,6 +75,13 @@ const PROVIDER_FIELD_DEFAULTS: Record<
     syncFolderPath: '',
     encryptKey: '',
     isEncryptionEnabled: false,
+  },
+  [SyncProviderId.Nextcloud]: {
+    serverUrl: '',
+    userName: '',
+    password: '',
+    syncFolderPath: '',
+    encryptKey: '',
   },
   [SyncProviderId.LocalFile]: {
     syncFolderPath: '',
@@ -154,6 +162,10 @@ export class SyncConfigService {
           ...DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
           ...syncCfg?.localFileSync,
         },
+        nextcloud: {
+          ...DEFAULT_GLOBAL_CONFIG.sync.nextcloud,
+          ...syncCfg?.nextcloud,
+        },
       };
 
       // If no provider is active, return base config with empty encryption key
@@ -206,6 +218,7 @@ export class SyncConfigService {
         localFileSync: DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
         webDav: DEFAULT_GLOBAL_CONFIG.sync.webDav,
         superSync: DEFAULT_GLOBAL_CONFIG.sync.superSync,
+        nextcloud: DEFAULT_GLOBAL_CONFIG.sync.nextcloud,
       };
 
       // Add current provider config if applicable
@@ -221,6 +234,11 @@ export class SyncConfigService {
       this._lastSettings = v;
       SyncLog.log('syncSettingsForm$', redactSensitiveFields(v));
     }),
+    // Cache the latest emission across all subscribers (refCount:false) so a
+    // dialog opened later from the header — when the settings page is not
+    // mounted — can replay without re-running combineLatest and re-fetching
+    // /assets/sync-config-default-override.json.
+    shareReplay({ bufferSize: 1, refCount: false }),
   );
 
   async updateEncryptionPassword(
@@ -273,7 +291,8 @@ export class SyncConfigService {
     // Split settings into public (global config) and private (credentials/secrets)
     // to maintain security boundaries - credentials never go to global config
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { encryptKey, webDav, localFileSync, superSync, ...globalConfig } = newSettings;
+    const { encryptKey, webDav, localFileSync, superSync, nextcloud, ...globalConfig } =
+      newSettings;
     // Provider-specific settings (URLs, credentials) must be stored securely
     if (providerId) {
       await this._updatePrivateConfig(providerId, newSettings);

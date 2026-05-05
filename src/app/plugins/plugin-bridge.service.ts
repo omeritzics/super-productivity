@@ -31,6 +31,9 @@ import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
 import { addSubTask } from '../features/tasks/store/task.actions';
+import { parseTimeSpentChanges } from '../features/tasks/short-syntax';
+import { GlobalConfigService } from '../features/config/global-config.service';
+import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.const';
 import { TaskSharedActions } from '../root-store/meta/task-shared.actions';
 import { nanoid } from 'nanoid';
 import { WorkContextService } from '../features/work-context/work-context.service';
@@ -63,6 +66,7 @@ import { PluginHttpService } from './issue-provider/plugin-http.service';
 import { createPluginSyncAdapter } from './issue-provider/plugin-sync-adapter.service';
 import { PluginOAuthBridgeService } from './oauth/plugin-oauth-bridge.service';
 import { ISSUE_PROVIDER_TYPES } from '../features/issue/issue.const';
+import { PluginService } from './plugin.service';
 
 // New imports for simple counters
 import { selectAllSimpleCounters } from '../features/simple-counter/store/simple-counter.reducer';
@@ -78,6 +82,7 @@ import {
   upsertSimpleCounter,
 } from '../features/simple-counter/store/simple-counter.actions';
 import { getDbDateStr } from '../util/get-db-date-str';
+import { DataInitService } from '../core/data-init/data-init.service';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -112,6 +117,8 @@ export class PluginBridgeService implements OnDestroy {
   private _syncAdapterRegistry = inject(IssueSyncAdapterRegistryService);
   private _pluginHttpService = inject(PluginHttpService);
   private _pluginOAuthBridge = inject(PluginOAuthBridgeService);
+  private _dataInitService = inject(DataInitService);
+  private _globalConfigService = inject(GlobalConfigService);
 
   // Track header buttons registered by plugins
   private readonly _headerButtons = signal<PluginHeaderBtnCfg[]>([]);
@@ -262,6 +269,12 @@ export class PluginBridgeService implements OnDestroy {
     };
   }
 
+  private _isPluginBundled(pluginId: string): boolean {
+    const pluginService = this._injector.get(PluginService);
+    const path = pluginService.getPluginPath(pluginId);
+    return !!path && path.startsWith('assets/bundled-plugins/');
+  }
+
   /**
    * Register an issue provider plugin.
    */
@@ -317,6 +330,8 @@ export class PluginBridgeService implements OnDestroy {
       issueProviderKey: customKey,
       useAgendaView: issueProviderCfg?.useAgendaView,
       defaultAutoAddToBacklog: issueProviderCfg?.defaultAutoAddToBacklog,
+      allowPrivateNetwork:
+        issueProviderCfg?.allowPrivateNetwork && this._isPluginBundled(pluginId),
     });
 
     const registeredKey = this._pluginIssueProviderRegistry.getRegisteredKey(pluginId);
@@ -327,9 +342,10 @@ export class PluginBridgeService implements OnDestroy {
 
     // Register sync adapter if plugin supports two-way sync
     if (definition.fieldMappings?.length && definition.updateIssue) {
-      const adapter = createPluginSyncAdapter(
-        definition,
-        this._pluginHttpService.createHttpHelper.bind(this._pluginHttpService),
+      const registered = this._pluginIssueProviderRegistry.getProvider(registeredKey);
+      const httpOpts = { allowPrivateNetwork: registered?.allowPrivateNetwork };
+      const adapter = createPluginSyncAdapter(definition, (getHeaders) =>
+        this._pluginHttpService.createHttpHelper(getHeaders, httpOpts),
       );
       this._syncAdapterRegistry.register(registeredKey, adapter);
       PluginLog.log(
@@ -412,7 +428,7 @@ export class PluginBridgeService implements OnDestroy {
         });
 
         dialogRef.afterClosed().subscribe((result) => {
-          PluginLog.log('PluginBridge: Dialog closed with result:', result);
+          PluginLog.log('PluginBridge: Dialog closed');
           resolve();
         });
       } catch (error) {
@@ -477,6 +493,10 @@ export class PluginBridgeService implements OnDestroy {
     return contextTasks || [];
   }
 
+  async reInitData(): Promise<void> {
+    PluginLog.log('PluginBridge: Re-initializing app data');
+    await this._dataInitService.reInit();
+  }
   /**
    * Update a task
    */
@@ -531,7 +551,7 @@ export class PluginBridgeService implements OnDestroy {
       this._taskService.update(taskId, otherUpdates);
     }
 
-    PluginLog.log('PluginBridge: Task updated successfully', { taskId, updates });
+    PluginLog.log('PluginBridge: Task updated successfully', { taskId });
   }
 
   /**
@@ -549,15 +569,22 @@ export class PluginBridgeService implements OnDestroy {
 
     let createdTask: Task;
     if (taskData.parentId) {
-      // For subtasks, we need to use the addSubTask action to properly update parent
+      // For subtasks, we need to use the addSubTask action to properly update parent.
+      // Short-syntax (e.g. "15m") is normally applied by ShortSyntaxEffects, but that
+      // effect only listens to `addTask`/`updateTask` — not `addSubTask`. So the
+      // bridge has to parse subtask titles itself, mirroring MarkdownPasteService.
+      // Tags/projects are intentionally not parsed: subtasks always inherit them
+      // from the parent (see addSubTask reducer).
+      const subTaskTitleProps = this._parseSubTaskTitleTimeProps(taskData.title);
       const newTask = this._taskService.createNewTaskWithDefaults({
-        title: taskData.title,
+        title: subTaskTitleProps.title,
         additional: {
           notes: taskData.notes || '',
           timeEstimate: taskData.timeEstimate || 0,
           isDone: (taskData as { isDone?: boolean }).isDone || false,
           tagIds: [], // Subtasks don't have tags
           projectId: taskData.projectId || undefined,
+          ...subTaskTitleProps.timeProps,
         },
       });
 
@@ -572,7 +599,6 @@ export class PluginBridgeService implements OnDestroy {
 
       PluginLog.log('PluginBridge: Subtask added successfully', {
         taskId: createdTask.id,
-        taskData,
       });
 
       return createdTask.id;
@@ -595,7 +621,7 @@ export class PluginBridgeService implements OnDestroy {
         false, // isAddToBottom
       );
 
-      PluginLog.log('PluginBridge: Task added successfully', { taskId, taskData });
+      PluginLog.log('PluginBridge: Task added successfully', { taskId });
       return taskId;
     }
   }
@@ -646,7 +672,7 @@ export class PluginBridgeService implements OnDestroy {
   async addProject(projectData: Partial<ProjectCopy>): Promise<string> {
     typia.assert<Partial<ProjectCopy>>(projectData);
 
-    PluginLog.log('PluginBridge: Project add', { projectData });
+    PluginLog.log('PluginBridge: Project add');
     return this._projectService.add(projectData);
   }
 
@@ -660,7 +686,7 @@ export class PluginBridgeService implements OnDestroy {
     // Update the project using ProjectService (ProjectCopy is compatible with Project)
     this._projectService.update(projectId, updates);
 
-    PluginLog.log('PluginBridge: Project updated successfully', { projectId, updates });
+    PluginLog.log('PluginBridge: Project updated successfully', { projectId });
   }
 
   /**
@@ -679,7 +705,7 @@ export class PluginBridgeService implements OnDestroy {
 
     // Add the tag using TagService (TagCopy is compatible with Tag)
     const tagId = this._tagService.addTag(tagData);
-    PluginLog.log('PluginBridge: Tag added successfully', { tagId, tagData });
+    PluginLog.log('PluginBridge: Tag added successfully', { tagId });
     return tagId;
   }
 
@@ -692,7 +718,7 @@ export class PluginBridgeService implements OnDestroy {
 
     // Update the tag using TagService (TagCopy is compatible with Tag)
     this._tagService.updateTag(tagId, updates);
-    PluginLog.log('PluginBridge: Tag updated successfully', { tagId, updates });
+    PluginLog.log('PluginBridge: Tag updated successfully', { tagId });
   }
 
   /**
@@ -1199,6 +1225,25 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Validate that referenced project, tags, and parent task exist
    */
+  // Mirrors MarkdownPasteService._parseTimeProps: respects the user's
+  // shortSyntax.isEnableDue config, returns the cleaned title and any parsed
+  // time fields. Used for subtasks because `addSubTask` doesn't trigger the
+  // ShortSyntaxEffects pipeline.
+  private _parseSubTaskTitleTimeProps(originalTitle: string): {
+    title: string;
+    timeProps: Partial<TaskCopy>;
+  } {
+    const shortSyntaxConfig =
+      this._globalConfigService.cfg()?.shortSyntax ?? DEFAULT_GLOBAL_CONFIG.shortSyntax;
+    if (!shortSyntaxConfig.isEnableDue) {
+      return { title: originalTitle, timeProps: {} };
+    }
+    const { title: cleanedTitle, ...timeProps } = parseTimeSpentChanges({
+      title: originalTitle,
+    });
+    return { title: cleanedTitle ?? originalTitle, timeProps };
+  }
+
   private async _validateTaskReferences(
     projectId?: string | null,
     tagIds?: string[],

@@ -154,14 +154,9 @@ export const globalConfigReducer = createReducer<GlobalConfigState>(
         ...DEFAULT_GLOBAL_CONFIG.shortSyntax,
         ...appDataComplete.globalConfig.shortSyntax,
       },
-      overlayIndicator: {
-        ...DEFAULT_GLOBAL_CONFIG.overlayIndicator,
-        ...appDataComplete.globalConfig.overlayIndicator,
-        // Migrate deprecated misc.isOverlayIndicatorEnabled
-        ...(appDataComplete.globalConfig.misc?.isOverlayIndicatorEnabled !== undefined &&
-        appDataComplete.globalConfig.overlayIndicator?.isEnabled === undefined
-          ? { isEnabled: appDataComplete.globalConfig.misc.isOverlayIndicatorEnabled }
-          : {}),
+      focusMode: {
+        ...DEFAULT_GLOBAL_CONFIG.focusMode,
+        ...appDataComplete.globalConfig.focusMode,
       },
       sync: {
         ...incomingSyncConfig,

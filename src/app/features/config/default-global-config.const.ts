@@ -47,6 +47,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
     isMinimizeToTray: false,
+    isLocalRestApiEnabled: false,
     isTrayShowCurrentCountdown: true,
     startOfNextDay: 0,
     isDisableAnimations: false,
@@ -92,14 +93,10 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   focusMode: {
     isSkipPreparation: false,
     isPlayTick: false,
-    isPauseTrackingDuringBreak: false,
+    focusModeSound: 'off',
+    isPauseTrackingDuringBreak: true,
     isSyncSessionWithTracking: false,
     isStartInBackground: false,
-  },
-  overlayIndicator: {
-    isEnabled: false,
-    isAlwaysShow: false,
-    opacity: 95,
   },
   clipboardImages: {
     imagePath: null,
@@ -230,6 +227,13 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 
     localFileSync: {
       syncFolderPath: '',
+    },
+
+    nextcloud: {
+      serverUrl: null,
+      userName: null,
+      password: null,
+      syncFolderPath: 'super-productivity',
     },
   },
 } as const;

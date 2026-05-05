@@ -8,7 +8,16 @@ import {
   loadSyncProviders,
   LocalFileSyncPicker,
 } from '../../../op-log/sync-providers/sync-providers.factory';
-import { FormlyFieldConfig } from '@ngx-formly/core';
+import { FormlyFieldConfig, FormlyFieldProps } from '@ngx-formly/core';
+
+/**
+ * Stable structural marker on the "Advanced" collapsibles so the dialog
+ * component can route action-button injection without depending on the
+ * (globally shared) translation key in `props.label`.
+ */
+export interface SyncCollapsibleProps extends FormlyFieldProps {
+  syncRole?: 'advanced';
+}
 import { IS_NATIVE_PLATFORM } from '../../../util/is-native-platform';
 import { SUPER_SYNC_DEFAULT_BASE_URL } from '../../../op-log/sync-providers/super-sync/super-sync.model';
 import {
@@ -132,7 +141,11 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         options: [
           { label: 'SuperSync (Beta)', value: SyncProviderId.SuperSync },
           { label: SyncProviderId.Dropbox, value: SyncProviderId.Dropbox },
-          { label: 'WebDAV (experimental)', value: SyncProviderId.WebDAV },
+          { label: 'Nextcloud', value: SyncProviderId.Nextcloud },
+          {
+            label: 'WebDAV (not recommended / no support)',
+            value: SyncProviderId.WebDAV,
+          },
           ...(IS_ELECTRON || IS_ANDROID_WEB_VIEW
             ? [
                 {
@@ -164,6 +177,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           key: 'syncFolderPath',
           templateOptions: {
             text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+            btnStyle: 'stroked',
             onClick: async () => {
               const providers = await loadSyncProviders();
               const localProvider = providers.find(
@@ -199,6 +213,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           key: 'safFolderUri',
           templateOptions: {
             text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+            btnStyle: 'stroked',
             onClick: async () => {
               // NOTE: this actually sets the value in the model
               const providers = await loadSyncProviders();
@@ -216,6 +231,75 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       ],
     },
 
+    // Nextcloud provider form fields
+    {
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider !== SyncProviderId.Nextcloud,
+      resetOnHide: false,
+      key: 'nextcloud',
+      fieldGroup: [
+        // CORS info (web only)
+        ...(!IS_ELECTRON && !IS_NATIVE_PLATFORM
+          ? [
+              {
+                type: 'tpl',
+                templateOptions: {
+                  tag: 'p',
+                  text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
+                },
+              },
+            ]
+          : []),
+        {
+          key: 'serverUrl',
+          type: 'input',
+          templateOptions: {
+            label: T.F.SYNC.FORM.NEXTCLOUD.L_SERVER_URL,
+            description: T.F.SYNC.FORM.NEXTCLOUD.SERVER_URL_DESCRIPTION,
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === SyncProviderId.Nextcloud,
+          },
+        },
+        {
+          key: 'userName',
+          type: 'input',
+          templateOptions: {
+            label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === SyncProviderId.Nextcloud,
+          },
+        },
+        {
+          key: 'password',
+          type: 'input',
+          templateOptions: {
+            type: 'password',
+            label: T.F.SYNC.FORM.NEXTCLOUD.L_APP_PASSWORD,
+            description: T.F.SYNC.FORM.NEXTCLOUD.APP_PASSWORD_DESCRIPTION,
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === SyncProviderId.Nextcloud,
+          },
+        },
+        {
+          key: 'syncFolderPath',
+          type: 'input',
+          templateOptions: {
+            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === SyncProviderId.Nextcloud,
+          },
+        },
+      ],
+    },
+
     // WebDAV provider form fields
     {
       hideExpression: (m, v, field) =>
@@ -226,7 +310,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         infoText: T.F.SYNC.FORM.WEB_DAV.INFO,
         corsInfoText: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
         baseUrlDescription:
-          '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName/',
+          '* e.g. https://your-server/remote.php/dav/files/yourUserName/',
       }),
     },
 
@@ -236,8 +320,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== SyncProviderId.Dropbox,
       resetOnHide: false,
-      // Custom marker for identifying this field group in config-page.component.ts
-      props: { dropboxAuth: true } as any,
       fieldGroup: [
         {
           type: 'tpl',
@@ -246,47 +328,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             text: T.F.SYNC.FORM.DROPBOX.INFO_TEXT,
           },
         },
-        {
-          type: 'tpl',
-          key: 'authStatus',
-          className: 'auth-status-indicator',
-          templateOptions: {
-            tag: 'p',
-            // Text will be set dynamically in config-page.component.ts
-            text: '',
-          },
-        },
-        // Authentication button will be added programmatically in config-page.component.ts
       ],
-    },
-
-    {
-      key: 'syncInterval',
-      type: 'duration',
-      // NOTE: we don't hide because model updates don't seem to work properly for this
-      // hideExpression: ((model: DropboxSyncConfig) => !model.accessToken),
-      // Hide for SuperSync (uses fixed interval) and when manual sync only is enabled
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider === SyncProviderId.SuperSync ||
-        field?.parent?.model.isManualSyncOnly === true,
-      resetOnHide: true,
-      templateOptions: {
-        required: true,
-        isAllowSeconds: true,
-        label: T.F.SYNC.FORM.L_SYNC_INTERVAL,
-        description: T.G.DURATION_DESCRIPTION,
-      },
-    },
-    {
-      key: 'isManualSyncOnly',
-      type: 'checkbox',
-      // Only show for file-based providers (Dropbox, WebDAV, LocalFile)
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider === SyncProviderId.SuperSync ||
-        field?.parent?.model.syncProvider === null,
-      templateOptions: {
-        label: T.F.SYNC.FORM.L_MANUAL_SYNC_ONLY,
-      },
     },
 
     // Encryption status box - shown when encryption is enabled (for any provider)
@@ -350,13 +392,40 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
 
     // COMMON SETTINGS
-    // Hide for SuperSync - uses fixed settings (no compression config, encryption handled separately)
+    // Hide for SuperSync during first-time setup (uses fixed settings; no buttons to host).
+    // The dialog component drops this hide in edit mode and appends action buttons.
     {
       type: 'collapsible',
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider === SyncProviderId.SuperSync,
-      props: { label: T.G.ADVANCED_CFG },
+      // syncRole is a stable structural marker the dialog routes on, so a
+      // future global rename of T.G.ADVANCED_CFG cannot silently break it.
+      props: { label: T.G.ADVANCED_CFG, syncRole: 'advanced' } as SyncCollapsibleProps,
       fieldGroup: [
+        {
+          key: 'syncInterval',
+          type: 'duration',
+          // Hide when manual sync only is enabled (parent.parent reaches the form root)
+          hideExpression: (m, v, field) =>
+            field?.parent?.parent?.model?.isManualSyncOnly === true,
+          resetOnHide: true,
+          templateOptions: {
+            required: true,
+            isAllowSeconds: true,
+            label: T.F.SYNC.FORM.L_SYNC_INTERVAL,
+            description: T.G.DURATION_DESCRIPTION,
+          },
+        },
+        {
+          key: 'isManualSyncOnly',
+          type: 'checkbox',
+          // Only show for file-based providers (Dropbox, WebDAV, LocalFile, Nextcloud)
+          hideExpression: (m, v, field) =>
+            field?.parent?.parent?.model?.syncProvider === null,
+          templateOptions: {
+            label: T.F.SYNC.FORM.L_MANUAL_SYNC_ONLY,
+          },
+        },
         {
           key: 'isCompressionEnabled',
           type: 'checkbox',
@@ -374,6 +443,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           templateOptions: {
             text: T.F.SYNC.FORM.FILE_BASED.BTN_ENABLE_ENCRYPTION,
             btnType: 'primary',
+            btnStyle: 'stroked',
             onClick: async (field: FormlyFieldConfig) => {
               const result = await openEnableEncryptionDialogForFileBased();
               if (result?.success && field?.model) {
@@ -400,15 +470,12 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             text: T.F.SYNC.FORM.SUPER_SYNC.BTN_GET_TOKEN,
             tooltip: T.F.SYNC.FORM.SUPER_SYNC.LOGIN_INSTRUCTIONS,
             btnType: 'primary',
+            btnStyle: 'stroked',
             centerBtn: true,
             onClick: (field: any) => {
               const baseUrl = field.model.baseUrl || SUPER_SYNC_DEFAULT_BASE_URL;
               window.open(baseUrl, '_blank');
             },
-          },
-          expressionProperties: {
-            'templateOptions.btnStyle': (model: any) =>
-              model.accessToken ? 'stroked' : undefined,
           },
         },
         {
@@ -453,6 +520,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           templateOptions: {
             text: T.F.SYNC.FORM.SUPER_SYNC.BTN_ENABLE_ENCRYPTION,
             btnType: 'primary',
+            btnStyle: 'stroked',
             onClick: async (field: FormlyFieldConfig) => {
               const result = await openEnableEncryptionDialog();
               if (result?.success && field?.model) {
@@ -467,7 +535,10 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           type: 'collapsible',
           hideExpression: (m, v, field) =>
             field?.parent?.parent?.model.syncProvider !== SyncProviderId.SuperSync,
-          props: { label: T.G.ADVANCED_CFG },
+          props: {
+            label: T.G.ADVANCED_CFG,
+            syncRole: 'advanced',
+          } as SyncCollapsibleProps,
           fieldGroup: [
             // Server URL
             {

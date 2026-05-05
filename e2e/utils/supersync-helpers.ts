@@ -239,8 +239,34 @@ export const createSimulatedClient = async (
     }
   });
 
-  // Navigate to app and wait for ready
-  await page.goto('/');
+  // Navigate to app with retry for transient ERR_CONNECTION_REFUSED.
+  // Under parallel load (many workers × 2-3 browser contexts each), the Angular
+  // dev server can temporarily refuse connections. Retrying recovers from this
+  // without failing the test outright.
+  let lastGotoError: Error | null = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      await page.goto('/');
+      lastGotoError = null;
+      break;
+    } catch (e) {
+      lastGotoError = e as Error;
+      const isConnectionRefused = lastGotoError.message.includes(
+        'ERR_CONNECTION_REFUSED',
+      );
+      if (attempt < 2 && isConnectionRefused) {
+        const delay = 1000 * (attempt + 1);
+        console.log(
+          `[Client ${clientName}] page.goto('/') failed (attempt ${attempt + 1}/3): ERR_CONNECTION_REFUSED — retrying in ${delay}ms`,
+        );
+        await new Promise((r) => setTimeout(r, delay));
+      } else {
+        break; // Non-connection error or last attempt — let it throw below
+      }
+    }
+  }
+  if (lastGotoError) throw lastGotoError;
+
   await waitForAppReady(page);
 
   const workView = new WorkViewPage(page, `${clientName}-${testPrefix}`);
@@ -491,6 +517,12 @@ export const getParentTaskElement = (
 /**
  * Mark a task as done by hovering and clicking the done button.
  *
+ * Waits for the `.isDone` class to appear before returning. `TaskService.toggleDoneWithAnimation`
+ * schedules the actual `setDone` dispatch via `setTimeout(200ms)` for the mark-done animation,
+ * so without this wait a following sync can start before the updateTask op is captured — the
+ * late op then lands during the sync's upload, leaving `hasPendingOps=true` and the check icon
+ * never appears.
+ *
  * @param client - The simulated E2E client
  * @param taskName - The task name to mark as done
  */
@@ -501,11 +533,17 @@ export const markTaskDone = async (
   const task = getTaskElement(client, taskName);
   await task.hover();
   await task.locator('done-toggle').click();
+  await expect(getDoneTaskElement(client, taskName).first()).toBeVisible({
+    timeout: UI_VISIBLE_TIMEOUT,
+  });
 };
 
 /**
  * Mark a subtask as done by hovering and clicking the done button.
  * Uses getSubtaskElement to avoid matching parent tasks.
+ *
+ * Waits for `.isDone` for the same reason as `markTaskDone` — the 200ms animation delay in
+ * `toggleDoneWithAnimation` would otherwise race the following sync and leave pending ops.
  *
  * @param client - The simulated E2E client
  * @param subtaskName - The subtask name to mark as done
@@ -517,6 +555,9 @@ export const markSubtaskDone = async (
   const subtask = getSubtaskElement(client, subtaskName);
   await subtask.hover();
   await subtask.locator('done-toggle').click();
+  await expect(getDoneSubtaskElement(client, subtaskName).first()).toBeVisible({
+    timeout: UI_VISIBLE_TIMEOUT,
+  });
 };
 
 /**
@@ -586,21 +627,64 @@ export const renameTask = async (
   newName: string,
 ): Promise<void> => {
   const task = getTaskElement(client, oldName);
-  // Click the task-title component to enter edit mode
-  await task.locator('task-title').first().click();
-  await client.page.waitForTimeout(300);
+  // Wait for the task element to be stable before interacting — prevents
+  // "element detached from DOM" errors when Angular re-renders the task list
+  await task.waitFor({ state: 'attached', timeout: 5000 });
 
-  // Wait for the textarea to appear and be focused
-  const textarea = client.page.locator('task-title textarea');
-  await textarea.first().waitFor({ state: 'visible', timeout: 5000 });
-  await textarea.first().focus();
-  await client.page.waitForTimeout(100);
+  // Wait for Angular enter animations to complete. On slower/loaded CI machines the
+  // task element may still carry the `ng-animating` class when first visible,
+  // causing clicks to be swallowed and `task-title` to be temporarily absent.
+  await task
+    .evaluate((el) =>
+      el.classList.contains('ng-animating')
+        ? new Promise<void>((resolve) => {
+            const observer = new MutationObserver(() => {
+              if (!el.classList.contains('ng-animating')) {
+                observer.disconnect();
+                resolve();
+              }
+            });
+            observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+            setTimeout(() => {
+              observer.disconnect();
+              resolve();
+            }, 2000);
+          })
+        : undefined,
+    )
+    .catch(() => {});
 
-  // Select all text and delete it, then type new name using keyboard
-  await client.page.keyboard.press('Control+a');
-  await client.page.keyboard.press('Backspace');
-  await client.page.keyboard.type(newName, { delay: 5 });
-  await client.page.keyboard.press('Tab');
+  // Enter edit mode by dispatching a click event directly on the task-title element.
+  // Using dispatchEvent avoids pointer-events:none and Playwright actionability issues.
+  // Retry up to 3 times: Angular may still re-render the component briefly after
+  // the animation class is removed, causing the click to not open edit mode.
+  const taskTitle = task.locator('task-title').first();
+  const textarea = client.page.locator('task-title textarea').first();
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await taskTitle.dispatchEvent('click');
+    try {
+      await textarea.waitFor({ state: 'visible', timeout: 3000 });
+      break;
+    } catch {
+      if (attempt === 2) {
+        throw new Error(
+          `renameTask: textarea did not appear after 3 click attempts on "${oldName}"`,
+        );
+      }
+      await client.page.waitForTimeout(500);
+    }
+  }
+
+  // Type directly into the textarea via evaluate to avoid focus/detach races
+  await textarea.evaluate((el: HTMLTextAreaElement, name: string) => {
+    el.focus();
+    el.value = name;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }, newName);
+  // Blur to commit the change
+  await textarea.evaluate((el: HTMLTextAreaElement) => {
+    el.dispatchEvent(new Event('blur', { bubbles: true }));
+  });
   await client.page.waitForTimeout(UI_SETTLE_MEDIUM);
 };
 
@@ -759,21 +843,21 @@ export const createProjectReliably = async (
     .first();
   await projectsTree.waitFor({ state: 'visible' });
 
-  // The "Create Project" button is an additional-btn with an 'add' icon
-  const addBtn = projectsTree.locator('.additional-btn mat-icon:has-text("add")').first();
+  // Hover the group header to make additional buttons visible and clickable
+  // (buttons have pointer-events: none by default, only enabled on hover)
+  const groupNavItem = projectsTree.locator('nav-item').first();
+  await groupNavItem.hover();
+  await page.waitForTimeout(UI_SETTLE_SMALL);
 
-  if (await addBtn.isVisible()) {
+  // Target the button element (not the mat-icon inside it)
+  const addBtn = projectsTree.locator(
+    '.additional-btns button[mat-icon-button]:has(mat-icon:text("add"))',
+  );
+  try {
+    await addBtn.waitFor({ state: 'visible', timeout: 5000 });
     await addBtn.click();
-  } else {
-    // Try to hover the group header to make buttons appear
-    const groupNavItem = projectsTree.locator('nav-item').first();
-    await groupNavItem.hover();
-    await page.waitForTimeout(UI_SETTLE_SMALL);
-    if (await addBtn.isVisible()) {
-      await addBtn.click();
-    } else {
-      throw new Error('Could not find Create Project button');
-    }
+  } catch {
+    await addBtn.click({ force: true });
   }
 
   // Dialog
@@ -840,8 +924,11 @@ export const archiveDoneTasks = async (client: SimulatedE2EClient): Promise<void
   await saveAndGoHomeBtn.waitFor({ state: 'visible', timeout: UI_VISIBLE_TIMEOUT });
   await saveAndGoHomeBtn.click();
 
-  // Wait for navigation back to work view
-  await client.page.waitForURL(/(active\/tasks|tag\/TODAY\/tasks)/);
+  // Wait for navigation back to work view.
+  // Use negative lookahead: /(active\/tasks|tag\/TODAY)/ would match the
+  // current /daily-summary URL; adding (?!\/daily-summary) ensures we wait
+  // for a real navigation. Also handles tag/TODAY without /tasks suffix.
+  await client.page.waitForURL(/(active\/tasks|tag\/TODAY(?!\/daily-summary))/);
   await client.page.waitForTimeout(UI_SETTLE_STANDARD);
 };
 

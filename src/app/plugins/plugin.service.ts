@@ -49,6 +49,8 @@ const BUNDLED_PLUGIN_PATHS = [
   'assets/bundled-plugins/clickup-issue-provider',
   'assets/bundled-plugins/brain-dump',
   'assets/bundled-plugins/voice-reminder',
+  'assets/bundled-plugins/google-calendar-provider',
+  'assets/bundled-plugins/caldav-calendar-provider',
 ] as const;
 
 @Injectable({
@@ -1001,7 +1003,6 @@ export class PluginService implements OnDestroy {
         throw new Error(
           this._translateService.instant(T.PLUGINS.MANIFEST_TOO_LARGE, {
             maxSize: (MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1),
-            fileSize: (manifestBytes.length / 1024).toFixed(1),
           }),
         );
       }
@@ -1030,7 +1031,6 @@ export class PluginService implements OnDestroy {
         throw new Error(
           this._translateService.instant(T.PLUGINS.CODE_TOO_LARGE, {
             maxSize: (MAX_PLUGIN_CODE_SIZE / 1024 / 1024).toFixed(1),
-            fileSize: (pluginCodeBytes.length / 1024 / 1024).toFixed(1),
           }),
         );
       }
@@ -1041,12 +1041,11 @@ export class PluginService implements OnDestroy {
       let indexHtml: string | null = null;
       if (manifest.iFrame && extractedFiles['index.html']) {
         const indexHtmlBytes = extractedFiles['index.html'];
-        // Validate index.html size (same as manifest for now)
+        // Reuse the manifest size limit for index.html.
         if (indexHtmlBytes.length > MAX_PLUGIN_MANIFEST_SIZE) {
           throw new Error(
-            this._translateService.instant(T.PLUGINS.MANIFEST_TOO_LARGE, {
+            this._translateService.instant(T.PLUGINS.INDEX_HTML_TOO_LARGE, {
               maxSize: (MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1),
-              fileSize: (indexHtmlBytes.length / 1024).toFixed(1),
             }),
           );
         }
@@ -1057,12 +1056,11 @@ export class PluginService implements OnDestroy {
       let iconContent: string | null = null;
       if (manifest.icon && extractedFiles[manifest.icon]) {
         const iconBytes = extractedFiles[manifest.icon];
-        // Validate icon size (same as manifest for now)
+        // Reuse the manifest size limit for the SVG icon.
         if (iconBytes.length > MAX_PLUGIN_MANIFEST_SIZE) {
           throw new Error(
-            this._translateService.instant(T.PLUGINS.MANIFEST_TOO_LARGE, {
+            this._translateService.instant(T.PLUGINS.ICON_TOO_LARGE, {
               maxSize: (MAX_PLUGIN_MANIFEST_SIZE / 1024).toFixed(1),
-              fileSize: (iconBytes.length / 1024).toFixed(1),
             }),
           );
         }
@@ -1071,6 +1069,19 @@ export class PluginService implements OnDestroy {
         if (!iconContent.includes('<svg') || !iconContent.includes('</svg>')) {
           PluginLog.err(`Plugin icon ${manifest.icon} does not appear to be a valid SVG`);
           iconContent = null;
+        }
+      }
+
+      // Extract config schema if specified in manifest
+      let configSchema: string | undefined;
+      if (manifest.jsonSchemaCfg && extractedFiles[manifest.jsonSchemaCfg]) {
+        const schemaBytes = extractedFiles[manifest.jsonSchemaCfg];
+        if (schemaBytes.length <= MAX_PLUGIN_MANIFEST_SIZE) {
+          configSchema = new TextDecoder().decode(schemaBytes);
+        } else {
+          PluginLog.err(
+            `Plugin config schema ${manifest.jsonSchemaCfg} is too large, skipping`,
+          );
         }
       }
 
@@ -1108,6 +1119,8 @@ export class PluginService implements OnDestroy {
         pluginCode,
         indexHtml || undefined,
         iconContent || undefined,
+        undefined,
+        configSchema,
       );
 
       // Store index.html content if it exists

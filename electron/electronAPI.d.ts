@@ -2,6 +2,7 @@ import { IpcRendererEvent } from 'electron';
 import {
   GlobalConfigState,
   TakeABreakConfig,
+  TaskWidgetConfig,
 } from '../src/app/features/config/global-config.model';
 import { KeyboardConfig } from '../src/app/features/config/keyboard-config.model';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
@@ -14,6 +15,10 @@ import {
   PluginNodeScriptResult,
   PluginManifest,
 } from '../packages/plugin-api/src/types';
+import {
+  LocalRestApiRequestPayload,
+  LocalRestApiResponsePayload,
+} from './shared-with-frontend/local-rest-api.model';
 
 export interface ElectronAPI {
   on(
@@ -44,7 +49,7 @@ export interface ElectronAPI {
 
   fileSyncRemove(args: { filePath: string }): Promise<unknown | Error>;
 
-  fileSyncListFiles(args: { dirPath: string }): Promise<string[] | Error>; // NEW
+  fileSyncListFiles(args: { dirPath: string }): Promise<string[] | Error>;
 
   checkDirExists(args: { dirPath: string }): Promise<true | Error>;
 
@@ -81,6 +86,8 @@ export interface ElectronAPI {
   }): Promise<{ success: boolean; error?: string }>;
 
   isLinux(): boolean;
+
+  isGnomeDesktop(): boolean;
 
   isMacOS(): boolean;
 
@@ -167,6 +174,8 @@ export interface ElectronAPI {
 
   sendSettingsUpdate(globalCfg: GlobalConfigState): void;
 
+  updateTaskWidgetSettings(cfg: TaskWidgetConfig): void;
+
   updateTitleBarDarkMode(isDarkMode: boolean): void;
 
   registerGlobalShortcuts(keyboardConfig: KeyboardConfig): void;
@@ -209,8 +218,12 @@ export interface ElectronAPI {
   ): Promise<PluginNodeScriptResult>;
 
   // Plugin OAuth
+  pluginOAuthPrepare(): Promise<{ port: number }>;
   pluginOAuthStart(url: string): void;
   onPluginOAuthCb(
     listener: (data: { code?: string; error?: string; state?: string }) => void,
   ): void;
+
+  onLocalRestApiRequest(listener: (payload: LocalRestApiRequestPayload) => void): void;
+  sendLocalRestApiResponse(payload: LocalRestApiResponsePayload): void;
 }

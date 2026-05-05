@@ -27,6 +27,7 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;
   isMinimizeToTray: boolean;
+  isLocalRestApiEnabled?: boolean;
   startOfNextDay: number;
   isDisableAnimations: boolean;
   // optional because it was added later
@@ -35,7 +36,8 @@ export type MiscConfig = Readonly<{
   isTrayShowCurrentCountdown?: boolean;
   isUseCustomWindowTitleBar?: boolean;
   customTheme?: string;
-  defaultStartPage?: number;
+  // number: one of DefaultStartPage. string: project id.
+  defaultStartPage?: number | string;
   unsplashApiKey?: string | null;
 
   // @todo: remove deprecated items in future major releases, after giving users time to migrate
@@ -46,8 +48,8 @@ export type MiscConfig = Readonly<{
   isTurnOffMarkdown?: boolean; // Deprecated
   defaultProjectId?: string | null | false; // Deprecated
   taskNotesTpl?: string; // Deprecated
-  isOverlayIndicatorEnabled?: boolean; // Deprecated – moved to overlayIndicator.isEnabled
-  overlayIndicatorOpacity?: number; // Deprecated – moved to overlayIndicator.opacity
+  isOverlayIndicatorEnabled?: boolean; // Deprecated – moved to taskWidget.isEnabled
+  overlayIndicatorOpacity?: number; // Deprecated – moved to taskWidget.opacity
 }>;
 
 export type TasksConfig = Readonly<{
@@ -130,6 +132,13 @@ export interface SuperSyncConfig extends WebDavConfig {
   encryptKey?: string | null;
 }
 
+export interface NextcloudConfig {
+  serverUrl?: string | null;
+  userName?: string | null;
+  password?: string | null;
+  syncFolderPath?: string | null;
+}
+
 export interface LocalFileSyncConfig {
   // TODO remove and migrate
   syncFilePath?: string | null;
@@ -177,6 +186,8 @@ export type SyncConfig = Readonly<{
   superSync?: SuperSyncConfig;
   /* NOTE: view model for form only*/
   localFileSync?: LocalFileSyncConfig;
+  /* NOTE: view model for form only*/
+  nextcloud?: NextcloudConfig;
 }>;
 
 export type ScheduleConfig = Readonly<{
@@ -219,6 +230,8 @@ export type DominaModeConfig = Readonly<{
 
 export type FocusModeConfig = Readonly<{
   isSkipPreparation: boolean;
+  focusModeSound?: 'off' | 'tick' | 'whiteNoise';
+  /** @deprecated Use focusModeSound instead. Kept for backward-compat validation of old data. */
   isPlayTick?: boolean;
   isPauseTrackingDuringBreak?: boolean;
   isSyncSessionWithTracking?: boolean;
@@ -226,7 +239,7 @@ export type FocusModeConfig = Readonly<{
   isManualBreakStart?: boolean;
 }>;
 
-export type OverlayIndicatorConfig = Readonly<{
+export type TaskWidgetConfig = Readonly<{
   isEnabled?: boolean;
   isAlwaysShow?: boolean;
   opacity?: number;
@@ -260,7 +273,10 @@ export type GlobalConfigState = Readonly<{
   schedule: ScheduleConfig;
   dominaMode: DominaModeConfig;
   focusMode: FocusModeConfig;
-  overlayIndicator: OverlayIndicatorConfig;
+  // NOTE: taskWidget is intentionally NOT part of GlobalConfigState — it is a
+  // per-instance setting persisted in localStorage (see TaskWidgetSettingsService)
+  // because OS behavior (window dragging/resizing, transparency) varies enough
+  // between Mac/Linux/Windows that syncing it across devices is undesirable.
   clipboardImages?: ClipboardImagesConfig;
 
   sync: SyncConfig;
@@ -268,6 +284,13 @@ export type GlobalConfigState = Readonly<{
 }>;
 
 export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';
+
+// 'taskWidget' isn't on GlobalConfigState (it's per-instance, see above), but
+// the form layer still uses this key in form configs and the config-page save
+// handler. Kept separate from `GlobalConfigSectionKey` so it cannot leak into
+// `updateGlobalConfigSection` action payloads (which would create phantom ops
+// in the sync log).
+export type GlobalConfigFormSectionKey = GlobalConfigSectionKey | 'taskWidget';
 
 export type GlobalSectionConfig =
   | MiscConfig
@@ -279,7 +302,7 @@ export type GlobalSectionConfig =
   | DailySummaryNote
   | SyncConfig
   | ClipboardImagesConfig
-  | OverlayIndicatorConfig;
+  | TaskWidgetConfig;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export interface LimitedFormlyFieldConfig<FormModel> extends Omit<
@@ -298,7 +321,7 @@ export type CustomCfgSection =
 // Intermediate model
 export interface ConfigFormSection<FormModel> {
   title: string;
-  key: GlobalConfigSectionKey | ProjectCfgFormKey;
+  key: GlobalConfigFormSectionKey | ProjectCfgFormKey;
   help?: string;
   helpArr?: { h?: string; p: string; p2?: string; p3?: string; p4?: string }[];
   customSection?: CustomCfgSection;

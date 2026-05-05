@@ -29,6 +29,13 @@
   min-height: calc(100vh - var(--safe-area-top));
 }
 
+// iOS keeps 100vh tied to the layout viewport while the soft keyboard is open.
+// Use visualViewport height from JS so the app shell shrinks above the keyboard.
+:host-context(body.isIOS.isKeyboardVisible) .app-container {
+  height: calc(var(--visual-viewport-height) - var(--safe-area-top));
+  min-height: calc(var(--visual-viewport-height) - var(--safe-area-top));
+}
+
 .main-content {
   flex: 1;
   display: flex;
@@ -213,11 +220,6 @@ mat-sidenav {
 }
 
 .app-entrance {
-  // Side nav slides in from left (desktop only)
-  magic-side-nav {
-    animation: entrance-slide-left 450ms ease-out 50ms backwards;
-  }
-
   // Main content area fades + slides up as a whole
   .main-content {
     animation: entrance-slide-up 450ms ease-out 150ms backwards;
@@ -226,7 +228,6 @@ mat-sidenav {
 
 @media (prefers-reduced-motion: reduce) {
   .app-entrance {
-    magic-side-nav,
     .main-content {
       animation: none;
     }
