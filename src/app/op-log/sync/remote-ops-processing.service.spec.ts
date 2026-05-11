@@ -11,6 +11,7 @@ import { VectorClockService } from './vector-clock.service';
 import { OperationApplierService } from '../apply/operation-applier.service';
 import { ConflictResolutionService } from './conflict-resolution.service';
 import { ValidateStateService } from '../validation/validate-state.service';
+import { SyncSessionValidationService } from './sync-session-validation.service';
 import { LockService } from './lock.service';
 import { OperationLogCompactionService } from '../persistence/operation-log-compaction.service';
 import { SyncImportFilterService } from './sync-import-filter.service';
@@ -61,6 +62,7 @@ describe('RemoteOpsProcessingService', () => {
       'getUnsyncedByEntity',
       'getOpsAfterSeq',
       'getLatestFullStateOp',
+      'getLatestFullStateOpEntry',
       'getOpById',
       'markRejected',
       'clearFullStateOps',
@@ -72,6 +74,7 @@ describe('RemoteOpsProcessingService', () => {
     // override these per-test to assert the captured snapshot.
     opLogStoreSpy.getVectorClock.and.resolveTo(null);
     opLogStoreSpy.getUnsynced.and.resolveTo([]);
+    opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(undefined);
     // By default, appendBatchSkipDuplicates writes all ops (no duplicates)
     opLogStoreSpy.appendBatchSkipDuplicates.and.callFake((ops: any[]) =>
       Promise.resolve({
@@ -844,6 +847,98 @@ describe('RemoteOpsProcessingService', () => {
         expect(result.localWinOpsCreated).toBe(0);
       });
 
+      it('should filter #7549 stragglers before they can trigger LWW local-win reuploads', async () => {
+        const storedSyncedImport = createFullOp({
+          id: '019dea96-94e3-7f82-9f0e-b78d7576a667',
+          actionType: '[SP_ALL] Load(import) all data' as ActionType,
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          entityId: 'import-1',
+          clientId: 'B_kc2U',
+          vectorClock: { ['B_kc2U']: 42 },
+        });
+
+        opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo({
+          seq: 1,
+          op: storedSyncedImport,
+          source: 'local',
+          syncedAt: Date.now(),
+          appliedAt: Date.now(),
+        });
+
+        const realSyncImportFilterService = TestBed.runInInjectionContext(
+          () => new SyncImportFilterService(),
+        );
+        syncImportFilterServiceSpy.filterOpsInvalidatedBySyncImport.and.callFake((ops) =>
+          realSyncImportFilterService.filterOpsInvalidatedBySyncImport(ops),
+        );
+
+        // These pending local ops would produce CONCURRENT conflicts if the stale
+        // remote ops below leaked past the import filter.
+        opLogStoreSpy.getUnsyncedByEntity.and.resolveTo(
+          new Map([
+            [
+              'TASK:task-repeat-instance',
+              [
+                createFullOp({
+                  id: 'local-task-op',
+                  entityId: 'task-repeat-instance',
+                  clientId: 'B_kc2U',
+                  vectorClock: { ['B_kc2U']: 43 },
+                }),
+              ],
+            ],
+            [
+              'TASK_REPEAT_CFG:repeat-cfg',
+              [
+                createFullOp({
+                  id: 'local-repeat-cfg-op',
+                  entityType: 'TASK_REPEAT_CFG',
+                  entityId: 'repeat-cfg',
+                  clientId: 'B_kc2U',
+                  vectorClock: { ['B_kc2U']: 44 },
+                }),
+              ],
+            ],
+          ]),
+        );
+        vectorClockServiceSpy.getEntityFrontier.and.resolveTo(new Map());
+        vectorClockServiceSpy.getSnapshotVectorClock.and.resolveTo({});
+        conflictResolutionServiceSpy.autoResolveConflictsLWW.and.resolveTo({
+          localWinOpsCreated: 57,
+        });
+        spyOn(service, 'detectConflicts').and.callThrough();
+
+        const remoteStragglers: Operation[] = [
+          createFullOp({
+            id: '019e03fa-9438-7d3f-9f7f-cd2e2010f230',
+            entityId: 'task-repeat-instance',
+            clientId: 'A_jfjc',
+            vectorClock: { ['A_jfjc']: 240 },
+          }),
+          createFullOp({
+            id: '019e03ba-433b-73f7-ad2e-577913108d4f',
+            entityType: 'TASK_REPEAT_CFG',
+            entityId: 'repeat-cfg',
+            clientId: 'B_z7PQ',
+            vectorClock: { ['B_z7PQ']: 12 },
+          }),
+        ];
+
+        const result = await service.processRemoteOps(remoteStragglers);
+
+        expect(result.localWinOpsCreated).toBe(0);
+        expect(result.allOpsFilteredBySyncImport).toBeTrue();
+        expect(result.filteredOpCount).toBe(2);
+        expect(result.filteringImport?.id).toBe(storedSyncedImport.id);
+        expect(result.isLocalUnsyncedImport).toBeFalse();
+        expect(service.detectConflicts).not.toHaveBeenCalled();
+        expect(
+          conflictResolutionServiceSpy.autoResolveConflictsLWW,
+        ).not.toHaveBeenCalled();
+        expect(opLogStoreSpy.appendBatchSkipDuplicates).not.toHaveBeenCalled();
+      });
+
       it('should return allOpsFilteredBySyncImport=false when some ops pass filter', async () => {
         const syncImportOp = createFullOp({
           id: '019afd68-0050-7000-0000-000000000000',
@@ -1171,6 +1266,35 @@ describe('RemoteOpsProcessingService', () => {
       );
     });
 
+    it('should flip the session-validation latch when partial-failure validation fails', async () => {
+      const remoteOps: Operation[] = [
+        createFullOp({ id: 'op-1' }),
+        createFullOp({ id: 'op-2' }),
+      ];
+
+      opLogStoreSpy.markFailed.and.resolveTo();
+      operationApplierServiceSpy.applyOperations.and.resolveTo({
+        appliedOps: [remoteOps[0]],
+        failedOp: { op: remoteOps[1], error: new Error('Test error') },
+      });
+      validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo(false);
+
+      const latch = TestBed.inject(SyncSessionValidationService);
+      latch._resetForTest();
+
+      await expectAsync(
+        latch.withSession(async () => {
+          await service.applyNonConflictingOps(remoteOps);
+        }),
+      ).toBeRejected();
+
+      expect(validateStateServiceSpy.validateAndRepairCurrentState).toHaveBeenCalledWith(
+        'partial-apply-failure',
+        { callerHoldsLock: false },
+      );
+      expect(latch.hasFailed()).toBe(true);
+    });
+
     // =========================================================================
     // Issue #6343: Atomic duplicate skipping (replaces issue #6213 retry logic)
     // =========================================================================
@@ -1273,6 +1397,90 @@ describe('RemoteOpsProcessingService', () => {
       expect(snackServiceSpy.open).toHaveBeenCalledWith(
         jasmine.objectContaining({ type: 'ERROR' }),
       );
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Issue #7330: validation failure must propagate up to sync status so
+    // the sync wrapper can refuse to claim IN_SYNC. Previously the boolean
+    // result was only used to drive a snackbar — sync still reported IN_SYNC.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    it('returns true when validation passes', async () => {
+      validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo(true);
+
+      const result = await service.validateAfterSync();
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false when validation fails', async () => {
+      validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo(false);
+
+      const result = await service.validateAfterSync();
+
+      expect(result).toBe(false);
+    });
+
+    it('processRemoteOps flips the session-validation latch when validation fails on the no-conflict path', async () => {
+      const remoteOps: Operation[] = [{ id: 'op1', schemaVersion: 1 } as Operation];
+
+      opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+      vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
+        Promise.resolve(new Set()),
+      );
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [remoteOps[0]] }),
+      );
+      spyOn(service, 'detectConflicts').and.resolveTo({
+        nonConflicting: remoteOps,
+        conflicts: [],
+      });
+      validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo(false);
+
+      const latch = TestBed.inject(SyncSessionValidationService);
+      latch._resetForTest();
+      await latch.withSession(async () => {
+        await service.processRemoteOps(remoteOps);
+      });
+
+      expect(latch.hasFailed()).toBe(true);
+    });
+
+    it('processRemoteOps leaves the latch reset when validation succeeds', async () => {
+      const remoteOps: Operation[] = [{ id: 'op1', schemaVersion: 1 } as Operation];
+
+      opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+      vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
+        Promise.resolve(new Set()),
+      );
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [remoteOps[0]] }),
+      );
+      spyOn(service, 'detectConflicts').and.resolveTo({
+        nonConflicting: remoteOps,
+        conflicts: [],
+      });
+      validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo(true);
+
+      const latch = TestBed.inject(SyncSessionValidationService);
+      latch._resetForTest();
+      await latch.withSession(async () => {
+        await service.processRemoteOps(remoteOps);
+      });
+
+      expect(latch.hasFailed()).toBe(false);
     });
   });
 });

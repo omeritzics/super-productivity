@@ -70,6 +70,11 @@
     }
   },
   "F": {
+    "ANDROID": {
+      "FOREGROUND_SERVICE_START_FAILED_FOCUS": "Android blocked the persistent focus mode notification. The timer continues in the app, but background alerts may be unavailable. Check notification permission and battery/background restrictions.",
+      "FOREGROUND_SERVICE_START_FAILED_TRACKING": "Android blocked the persistent time tracking notification. Time is still tracked in the app, but background recovery may be unavailable. Check notification permission and battery/background restrictions.",
+      "OPEN_NOTIFICATION_SETTINGS": "Open settings"
+    },
     "ATTACHMENT": {
       "LOCAL_FILE_UNAVAILABLE": "This attachment is only available on the device where it was added.",
       "DIALOG_EDIT": {
@@ -245,7 +250,14 @@
     },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
-        "FINISH_DAY_BEFORE_EXIT": "There are {{nr}} completed tasks in your Today list not yet moved to the archive. Are you sure you want to quit without finishing your day?"
+        "DONT_QUIT": "Don't quit",
+        "FINISH_DAY": "Finish Day",
+        "QUIT": "Quit",
+        "TITLE": "Finish your day before quitting?",
+        "UNARCHIVED_TASKS": {
+          "ONE": "1 completed task in your Today list hasn't been moved to the archive yet.",
+          "OTHER": "{{nr}} completed tasks in your Today list haven't been moved to the archive yet."
+        }
       }
     },
     "FOCUS_MODE": {
@@ -290,6 +302,20 @@
       "POMODORO_HINT": "Structured sprints with planned breaks",
       "POMODORO_SESSION_COMPLETED": "Pomodoro session completed!",
       "POMODORO_SETTINGS": "Pomodoro settings",
+      "FLOWTIME_SETTINGS": "Flowtime settings",
+      "FLOWTIME_ENABLE_BREAKS": "Enable Flowtime breaks",
+      "FLOWTIME_BREAK_MODE": "Break calculation mode",
+      "FLOWTIME_BREAK_MODE_RATIO": "Ratio-based",
+      "FLOWTIME_BREAK_MODE_RULE": "Rule-based",
+      "FLOWTIME_BREAK_PERCENTAGE": "Break percentage",
+      "FLOWTIME_BREAK_PERCENTAGE_DESC": "Take a break for this percentage of the work session length.",
+      "FLOWTIME_BREAK_RULES_DESC": "Rules are evaluated in ascending order. If ranges overlap, the first matching rule is used.",
+      "FLOWTIME_BREAK_TITLE": "Take a break",
+      "FLOWTIME_ADD_BREAK_RULE": "Add break rule",
+      "FLOWTIME_VALIDATION_MIN_MAX": "Max duration must be greater than or equal to Min duration",
+      "FLOWTIME_BREAK_RULE_MIN": "Min work duration (minutes)",
+      "FLOWTIME_BREAK_RULE_MAX": "Max work duration (minutes)",
+      "FLOWTIME_BREAK_RULE_DURATION": "Break duration (minutes)",
       "PREP_GET_MENTALLY_READY": "Get mentally ready to be focused and productive",
       "PREP_SIT_UPRIGHT": "Sit (or stand) upright",
       "PREP_STRETCH": "Enjoy some mild stretching",
@@ -481,6 +507,7 @@
         "LOAD_OPTIONS": "Load Options",
         "LOAD_OPTIONS_FAILED": "Failed to load options",
         "LOADING_OPTIONS": "Loading options...",
+        "OAUTH_UNAVAILABLE_WEB": "Available in the desktop and mobile apps. Synced settings stay saved, but live data cannot be loaded in the web app.",
         "OPTIONS_LOADED": "Options loaded",
         "RELOAD_OPTIONS": "Reload Options",
         "SETUP_TITLE": "Setup {{title}} Config",
@@ -884,8 +911,10 @@
         "TITLE": "Basic Settings"
       },
       "FORM_THEME": {
+        "D_BACKGROUND_IMAGE_BLUR": "Adjust this value to blur the background image. The default is 0px.",
         "D_BACKGROUND_OVERLAY_OPACITY": "Adjust this value to make the background more or less transparent. The default is 20%.",
         "HELP": "Theme settings for your project.",
+        "L_BACKGROUND_IMAGE_BLUR": "Blur background image",
         "L_BACKGROUND_IMAGE_DARK": "Background Image URL (Dark Theme)",
         "L_BACKGROUND_IMAGE_LIGHT": "Background Image URL (Light Theme)",
         "L_BACKGROUND_OVERLAY_OPACITY": "Darken/lighten background image for better contrast",
@@ -993,6 +1022,9 @@
         "TITLE": "Schedule"
       },
       "END": "Work End",
+      "EXCESS_TASK_TOOLTIP": "This task does not fully fit this day.",
+      "EXCESS_TASKS_DAY_TOOLTIP": "{{count}} tasks do not fit into the available time",
+      "EXCESS_TASKS_DAY_TOOLTIP_ONE": "1 task does not fit into the available time",
       "INSERT_BEFORE": "Before",
       "LUNCH_BREAK": "Lunch Break",
       "MONTH": "Month",
@@ -1365,7 +1397,7 @@
       "S": {
         "ALREADY_IN_SYNC": "Already in sync",
         "ARCHIVE_OPERATION_FAILED": "Archive operation failed. Some cleanup may not have completed.",
-        "AUTH_SETUP_FAILED": "Failed to set up authentication. If you're using the web app, make sure you're accessing it over HTTPS. Otherwise, please try the stable version or report this as a bug.",
+        "AUTH_SETUP_FAILED": "Failed to set up authentication. Please try again. If you're using the web app, make sure you're accessing it over HTTPS. Otherwise, please report this as a bug if it keeps happening.",
         "AUTH_TOKEN_REJECTED": "Sync token was rejected by the server: {{reason}}. Please get a new token.",
         "BTN_CONFIGURE": "Configure",
         "BTN_FORCE_OVERWRITE": "Force Overwrite",
@@ -1479,7 +1511,7 @@
         "LABEL": "Tags"
       },
       "FORM_BASIC": {
-        "D_COLOR": "If not set, defaults to the theme's Primary color.",
+        "D_COLOR": "If not set, defaults to the Tag Color.",
         "L_COLOR": "Tag Color",
         "L_ICON": "Icon",
         "L_TITLE": "Tag Name",
@@ -1819,6 +1851,8 @@
         "THURSDAY": "Thursday",
         "TITLE": "Task title",
         "TUESDAY": "Tuesday",
+        "WAIT_FOR_COMPLETION": "Only create next task after completion",
+        "WAIT_FOR_COMPLETION_DESCRIPTION": "Prevents multiple pending recurring tasks from piling up. The next instance will only be created once the current task is completed",
         "WEDNESDAY": "Wednesday",
         "WEEK_OF_MONTH": "Week of month",
         "WEEKDAY": "Weekday"
@@ -1933,6 +1967,7 @@
         "TOTAL_TIME": "Time spent total:",
         "VIEW_TASK_DETAILS": "View task details",
         "WEEK_NR": "Week {{nr}}",
+        "WEEK_NR_SHORT": "W{{nr}}",
         "WORKED": "Worked"
       },
       "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your Today task list?",
@@ -2090,6 +2125,11 @@
       "CAL_PATH": "URL of the iCal source",
       "CHECK_UPDATES": "Check for remote updates every X",
       "DISABLE_FOR_WEB_APP": "Disable when using web application",
+      "FILTER_EXCLUDE_REGEX": "Exclude events matching regex (optional)",
+      "FILTER_EXCLUDE_REGEX_DESCRIPTION": "Events whose title matches this regular expression will be hidden. Applied after the include filter. Example: Lunch|Daily|Blocker",
+      "FILTER_INCLUDE_REGEX": "Include events matching regex (optional)",
+      "FILTER_INCLUDE_REGEX_DESCRIPTION": "Only events whose title matches this regular expression will be shown. Leave empty to include all events. Example: meeting|standup",
+      "INVALID_REGEX": "Invalid regular expression",
       "HELP": "You can integrate calendars to be reminded and add them as tasks within Super Productivity. The integration works by using the iCal format. For this to work your calendars need to be accessible either over the internet or via file system.",
       "REFERENCE_CALENDAR": "Reference calendar (display only, no task creation)",
       "SHOW_BANNER_THRESHOLD": "Show a notification X before the event (blank for disabled)"
@@ -2291,6 +2331,12 @@
       "START_OF_NEXT_DAY_HINT": "The time when your day starts (Format: HH:mm, e.g. 02:30)",
       "THEME": "Theme",
       "THEME_EXPERIMENTAL": "Theme (experimental)",
+      "THEME_INSTALL_BUTTON": "Install theme…",
+      "THEME_INSTALL_TOOLTIP": "Upload a CSS theme file. Themes only change visuals — never run code — but they can still affect how your data is rendered. Only install themes from sources you trust.",
+      "THEME_INSTALLED_WITH_WARNINGS": "Theme installed. Missing tokens: {{tokens}}",
+      "THEME_INVALID_CSS_FILE": "Could not install theme: invalid or unsafe CSS file.",
+      "THEME_REMOVE_BUTTON": "Remove theme",
+      "THEME_REMOVED_TOAST": "Theme removed; reverted to Default.",
       "THEME_SELECT_LABEL": "Select Theme",
       "TITLE": "Misc Settings"
     },

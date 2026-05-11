@@ -17,6 +17,10 @@
       }
     }
   },
+  "dependencies": {
+    "@sp/sync-core": "*",
+    "zod": "^4.4.3"
+  },
   "scripts": {
     "build": "tsup",
     "build:tsc": "tsc",

@@ -38,7 +38,17 @@ async function getPlugins() {
 
   const plugins = [];
 
-  // Add shared-schema first as it's needed for type resolution
+  // Build sync-core before shared-schema. shared-schema re-exports generic
+  // vector-clock algorithms from sync-core, while sync-core must not import
+  // shared-schema; the sync core stays domain-agnostic.
+  plugins.push({
+    name: 'sync-core',
+    path: 'packages/sync-core',
+    buildCommand: 'npm run build',
+    skipCopy: true,
+  });
+
+  // Add shared-schema after sync-core as it's needed for app/server type resolution.
   plugins.push({
     name: 'shared-schema',
     path: 'packages/shared-schema',
